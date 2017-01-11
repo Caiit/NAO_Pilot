@@ -1,5 +1,6 @@
 # NAO Pilot
-UvA Programmeerproject application January 2017.
+Caitlin Lagrand </br>
+UvA Programmeerproject application January 2017. 
 
 
 The NAO pilot application controls a NAO robot (https://www.ald.softbankrobotics.com/en/cool-robots/nao). This application can for example be used for easily creating a dataset or giving demonstrations. The application connects with a NAO via WiFi,  lets the NAO speak, walk, perform and create specific moves (dances, kicks etc.) and gets the camera output. External specific moves files (probably keyframes) can be added and created to personalise it. The NaoQi Java SDK (http://doc.aldebaran.com/2-1/dev/java/index_java.html) will be used to connect and control the NAO. The biggest problem is connecting to the robot and stay connected. With the NaoQi SDK this should be done easily, but you never know with robots. Also, the application can become slow, mostly when showing camera output, due to the wireless connection with the robot.
@@ -20,6 +21,8 @@ Let the robot perform specific moves (dances, kicks etc.). </br>
 Move specific joints and save the configurations to be able to create specific moves. </br>
 
 ##a visual sketch of what the application will look like for the user; if you envision the application to have multiple screens, sketch these all out; not in full detail though
+
+<img src="/doc/appSketch.jpg">
 
 Connect screen: ask for IP and connect button, maybe home screen, when connected show robot information like name and battery status and volume. </br>
 Speak screen: input what to say and speak settings like voice and speed. </br>
