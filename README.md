@@ -41,11 +41,13 @@ The different control parts (move, speak, camera) can be separated.
 
 ##what external components (APIs) you probably need to make certain features possible
 
-The NaoQi Java SDK (http://doc.aldebaran.com/2-1/dev/java/index_java.html) will be used.
+~~The NaoQi Java SDK (http://doc.aldebaran.com/2-1/dev/java/index_java.html) will be used.~~ </br>
+Socket (https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html & https://docs.python.org/2/library/socket.html) </br>
+NaoQi Python SDK (http://doc.aldebaran.com/2-1/dev/python/install_guide.html) </br>
 
 ##technical problems or limitations that could arise during development and what possibilities you have to overcome these
 
-The biggest problem is connecting to the robot and stay connected. With the NaoQi SDK this should be done easily, but you never know with robots.
+The biggest problem is connecting to the robot and stay connected. ~~With the NaoQi SDK this should be done easily, but you never know with robots.~~ The NaoQi Java SDK can not be imported correctly within Android Studio, so socket will be used to create a server on the robot and send messages from the app to the robot to control it.
 Also, the app can become slow, mostly when showing camera images, due to the wireless connection with the robot.
 
 ##a review of similar applications or visualizations in terms of features and technical aspects (what do they offer? how have they implemented it?)
