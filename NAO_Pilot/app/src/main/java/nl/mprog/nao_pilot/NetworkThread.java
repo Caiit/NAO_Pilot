@@ -68,7 +68,7 @@ public class NetworkThread implements Runnable {
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
             // Send message to tell connection is created
-            out.writeUTF("Hello robo from the app.");
+            out.writeUTF("Hello robot from the app.");
 
             // Wait until message from server available
             while (in.available() == 0) {
