@@ -17,7 +17,7 @@ Camera screen: camera image from the selected camera and save button to save eit
 Specific moves screen: buttons or images with the specific move. Add new specific moves. </br>
 Move joints screen: sliders to move specific joints and save button. </br>
 
-# Datasources and external components
+## Datasources and external components
 
 External specific moves files (probably keyframes) will be used for the specific moves. These files can be created using choregraphe (http://doc.aldebaran.com/1-14/software/choregraphe/) or with the app. 
 
