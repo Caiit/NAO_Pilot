@@ -23,4 +23,6 @@ Test scripts outside Android Studio are written to create the connection. A Pyth
 Implemented the script that creates a client within Android Studio. This needs to be on a separate thread, because it uses a network connection. The thread starts when an IP is given and the connect button is clicked. A client is created and a continuous connection with the server is available. Messages to the server are saved in a queue. When the user wants to send a message, it is added to the queue. The networkthread handles this queue by taking the first item and sending it to the server. 
 
 # day 5
-Tested the code with the server on the robot. The robot says the message out loud.
+Tested the code with the server on the robot. The robot says the message out loud. </br>
+Created connect and speak app.
+
