@@ -40,7 +40,6 @@ public class NetworkThread implements Runnable {
             handleMessage((String) messageQueue.poll());
         }
         // Close client
-        Log.d(String.valueOf(client), "run: client");
         try {
             if (out != null) {
                 out.writeUTF("Closing connection from the app.");
