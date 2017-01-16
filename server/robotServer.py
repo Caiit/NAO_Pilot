@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import socket
+import json
 import sys
 import atexit
 
@@ -41,13 +42,25 @@ def handleConnection(connection):
     while (1):
         data = connection.recv(BUFFER_SIZE)[2:]
         if not data: break
-        print "Data: ", data
-        speak(data)
         try :
             connection.send("Data received \0")
         except socket.error:
             print 'Send failed'
+
+        jsonData = toJson(data)
+        dataType = jsonData["type"]
+        if dataType == "connect":
+            print "Connecting: ", jsonData["text"]
+        elif dataType == "speak":
+            speak(jsonData)
+        elif dataType == "disconnect":
+            print "Disconnecting"
+            break
     connection.close()
+
+
+def toJson(data):
+    return json.loads(data)
 
 
 def onExit(s):
@@ -59,9 +72,13 @@ def closeConnection(s):
     s.close()
 
 
-def speak(text):
+def speak(data):
     tts = ALProxy("ALTextToSpeech", IP, 9559)
-    tts.say(text)
+    tts.setVolume(float(data["volume"])/100)
+    pitch = float(data["pitch"]) / 100
+    if pitch > 0.0 and pitch < 1.0: pitch = 1.0
+    tts.setParameter("pitchShift", pitch)
+    tts.say("\\rspd=" + str(data["speed"]) + "\\" + str(data["text"]))
 
 
 def main():

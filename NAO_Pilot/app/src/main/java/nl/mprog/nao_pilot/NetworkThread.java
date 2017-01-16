@@ -2,6 +2,9 @@ package nl.mprog.nao_pilot;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,12 +40,12 @@ public class NetworkThread implements Runnable {
         createSocket();
         while (!shutdown) {
             receiveMessages();
-            handleMessage((String) messageQueue.poll());
+            handleMessage((JSONObject) messageQueue.poll());
         }
         // Close client
         try {
             if (out != null) {
-                out.writeUTF("Closing connection from the app.");
+                out.writeUTF(toJson("disconnect", "Closing connection from the app."));
                 Log.d("Closed successfully", "run: Connection closed");
             }
             client.close();
@@ -67,7 +70,7 @@ public class NetworkThread implements Runnable {
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
             // Send message to tell connection is created
-            out.writeUTF("Hello robot from the app.");
+            out.writeUTF(toJson("connect", "Hello robot from the app."));
 
             // Wait until message from server available
             while (in.available() == 0) {
@@ -76,19 +79,22 @@ public class NetworkThread implements Runnable {
             byte[] bytes = new byte[in.available()];
             in.read(bytes);
             Log.d("Server says: " + new String(bytes), "createSocket: ");
-        } catch(SocketTimeoutException e) {
-            Log.d("Could not connect", "createSocket: No connection possible");
-            e.printStackTrace();
-            shutdown = true;
-        } catch (ConnectException e) {
-            Log.d("Could not connect", "createSocket: No connection possible");
-            e.printStackTrace();
-            shutdown = true;
         } catch (IOException e) {
             Log.d("Could not connect", "createSocket: No connection possible");
             e.printStackTrace();
             shutdown = true;
         }
+    }
+
+    private String toJson(String type, String message) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", type);
+            json.put("text", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json.toString();
     }
 
     private void receiveMessages() {
@@ -103,10 +109,10 @@ public class NetworkThread implements Runnable {
         }
     }
 
-    private void handleMessage(String message) {
+    private void handleMessage(JSONObject message) {
         try {
             if (out != null && message != null) {
-                out.writeUTF(message);
+                out.writeUTF(message.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -114,7 +120,7 @@ public class NetworkThread implements Runnable {
         }
     }
 
-    void sendMessage(String message) {
+    void sendMessage(JSONObject message) {
         messageQueue.add(message);
     }
 

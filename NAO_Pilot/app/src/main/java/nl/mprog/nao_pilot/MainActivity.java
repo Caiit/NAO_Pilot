@@ -8,11 +8,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
     private NetworkThread networkThread;
-    ViewPager viewPager;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         // Add tabs
         addTabs();
-
     }
 
     private void addTabs() {
@@ -59,9 +62,28 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public void sayText(View view) {
         if (networkThread != null) {
             String message = ((EditText) findViewById(R.id.sayText)).getText().toString();
-            networkThread.sendMessage(message);
+            String volumeText = (String) ((TextView) findViewById(R.id.volumeText)).getText();
+            String volume = volumeText.split("\\s+")[1];
+            String speedText = (String) ((TextView) findViewById(R.id.speedText)).getText();
+            String speed = speedText.split("\\s+")[1];
+            String pitchText = (String) ((TextView) findViewById(R.id.pitchText)).getText();
+            String pitch = pitchText.split("\\s+")[1];
+
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "speak");
+                json.put("text", message);
+                json.put("volume", volume);
+                json.put("speed", speed);
+                json.put("pitch", pitch);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
         }
     }
+
+    /**************** TABS *******************/
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {

@@ -1,13 +1,14 @@
 #!/usr/bin/python
 
 import socket
+import json
 import sys
 import atexit
 
 HOST = ''   # Symbolic name, meaning all available interfaces
 PORT = 3006 # Arbitrary non-privileged port
 MAX_CLIENTS = 5
-BUFFER_SIZE = 100
+BUFFER_SIZE = 1024
 
 def createServer():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,12 +39,25 @@ def handleConnection(connection):
     while (1):
         data = connection.recv(BUFFER_SIZE)[2:]
         if not data: break
-        print "Data: ", data
         try :
             connection.send("Data received \0")
         except socket.error:
             print 'Send failed'
+
+        jsonData = toJson(data)
+        dataType = jsonData["type"]
+        if dataType == "connect":
+            print "Connecting: ", jsonData["text"]
+        elif dataType == "speak":
+            speak(jsonData)
+        elif dataType == "disconnect":
+            print "Disconnecting"
+            break
     connection.close()
+
+
+def toJson(data):
+    return json.loads(data)
 
 
 def onExit(s):
@@ -53,6 +67,14 @@ def onExit(s):
 def closeConnection(s):
     print("Closing connection")
     s.close()
+
+
+# Robot actions
+def speak(data):
+    print "Speaking: ", data["text"]
+    print "Volume: ", data["volume"]
+    print "Speed: ", data["speed"]
+    print "Pitch: ", data["pitch"]
 
 
 def main():
