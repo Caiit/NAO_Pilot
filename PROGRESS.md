@@ -24,5 +24,13 @@ Implemented the script that creates a client within Android Studio. This needs t
 
 # day 5
 Tested the code with the server on the robot. The robot says the message out loud. </br>
-Created connect and speak app.
+Created connect and speak fragments.
 
+# day 6
+Extended the speak fragment, the user can now change the volume, speed and pitch of the text. Created JSON objects of the data sent between the server and client. The following structure is used: </br>
+
+{type: speak, text: blub, volume: 100, speed: 100, pitch: 100} </br>
+{type: stiffness, part: Body, value: 1.0} </br>
+{type: walk, xspeed: 100, yspeed: 100} </br>
+
+Started on the walk fragment. The Networkthread is now a singleton. This caused some problems when restarting, because the thread was already closed, but existed. Currently, the thread is set to null when closed and when an instance is created, a new networkthread is created if the thread is null.
