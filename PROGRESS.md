@@ -34,3 +34,6 @@ Extended the speak fragment, the user can now change the volume, speed and pitch
 {type: walk, xspeed: 100, yspeed: 100} </br>
 
 Started on the walk fragment. The Networkthread is now a singleton. This caused some problems when restarting, because the thread was already closed, but existed. Currently, the thread is set to null when closed and when an instance is created, a new networkthread is created if the thread is null.
+
+# day 7
+The robot walks when the user presses the arrow and stops on release. However, when the press is really short, it does not correctly send the release command (because they are too close after each other). This can be fixed by also using a separate thread on the robot for handling the connection. 
