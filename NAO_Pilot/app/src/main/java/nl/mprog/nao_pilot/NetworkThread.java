@@ -8,10 +8,8 @@ import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -25,6 +23,7 @@ import java.util.Queue;
 
 public class NetworkThread implements Runnable {
 
+    private static NetworkThread thread = new NetworkThread();
     private String IP;
     private Socket client;
     private boolean shutdown = false;
@@ -32,15 +31,23 @@ public class NetworkThread implements Runnable {
     private DataOutputStream out;
     private Queue messageQueue = new LinkedList();
 
-    NetworkThread(String IP) {
+    public static NetworkThread getInstance() {
+        if (thread == null) thread = new NetworkThread();
+        return thread;
+    }
+
+    private NetworkThread() {
+    }
+
+    public void setIP(String IP) {
         this.IP = IP;
     }
 
     public void run() {
         createSocket();
         while (!shutdown) {
-            receiveMessages();
             handleMessage((JSONObject) messageQueue.poll());
+            receiveMessages();
         }
         // Close client
         try {
@@ -52,6 +59,7 @@ public class NetworkThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        thread = null;
     }
 
     private void createSocket() {
@@ -59,13 +67,11 @@ public class NetworkThread implements Runnable {
         Log.d(String.valueOf(client), "createSocket: before");
         try {
             Log.d("Connecting to " + IP + " on port " + port, "createSocket: ");
-            Log.d("test", "createSocket: creating socket");
             client = new Socket();
             client.connect(new InetSocketAddress(IP, port), 1000);
             Log.d(String.valueOf(client), "createSocket: socket created");
             out = new DataOutputStream(client.getOutputStream());
             in = new DataInputStream(client.getInputStream());
-            Log.d(String.valueOf(client.isConnected()), "createSocket: ");
 
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
@@ -105,6 +111,7 @@ public class NetworkThread implements Runnable {
                 Log.d("Server says: " + new String(bytes), "receiveMessages: ");
             }
         } catch (IOException e) {
+            Log.d("Receiving failed", "receiveMessages: ");
             e.printStackTrace();
         }
     }
