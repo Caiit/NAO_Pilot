@@ -5,9 +5,13 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -47,15 +51,49 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
 
             // Start thread with robot connection
-            networkThread = new NetworkThread(IP);
+            networkThread = NetworkThread.getInstance();
+            networkThread.setIP(IP);
             new Thread(networkThread).start();
             connectButton.setText("Disconnect");
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "info");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
+            Log.d(String.valueOf(json), "connect: json");
+
         } else {
+            Log.d(String.valueOf(networkThread), "connectRobot: closing thread");
             // Close thread
             if (networkThread != null) {
                 networkThread.closeThread();
             }
             connectButton.setText("Connect");
+        }
+    }
+
+    public void setStiffness(View view) {
+        CheckBox stiffness = (CheckBox) view;
+        if (networkThread != null) {
+            int value = 0;
+            if (stiffness.isChecked()) {
+                value = 1;
+            }
+
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "stiffness");
+                json.put("part", "Body");
+                json.put("value", value);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
+            Log.d(String.valueOf(json), "setStiffness: json");
+        } else {
+            stiffness.setChecked(false);
         }
     }
 

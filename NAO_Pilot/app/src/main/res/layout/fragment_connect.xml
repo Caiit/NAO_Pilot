@@ -5,32 +5,54 @@
     android:orientation="vertical">
 
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
     <TextView
-    android:layout_weight="0.1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Robot IP"
-    android:textSize="20sp"/>
+        android:layout_weight="0.1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Robot IP"
+        android:textSize="20sp"/>
 
     <EditText
-    android:layout_weight="0.9"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:inputType="numberSigned"
-    android:digits="0123456789."
-    android:id="@+id/IP" />
+        android:layout_weight="0.9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:digits="0123456789."
+        android:id="@+id/IP" />
     </LinearLayout>
 
     <Button
-    android:text="Connect"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:id="@+id/connectButton"
-    android:onClick="connectRobot"/>
+        android:text="Connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/connectButton"
+        android:onClick="connectRobot"/>
+
+    <CheckBox
+        android:text="Stiffness"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/stiffBox"
+        android:onClick="setStiffness"/>
+
+    <TextView
+        android:text="Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:id="@+id/nameTextView" />
+
+    <TextView
+        android:text="Battery: "
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:id="@+id/batteryTextView" />
 
 
 </LinearLayout>

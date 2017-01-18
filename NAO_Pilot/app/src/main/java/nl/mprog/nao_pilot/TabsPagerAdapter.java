@@ -19,7 +19,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -30,6 +30,8 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 return new ConnectFragment();
             case 1:
                 return new SpeakFragment();
+            case 2:
+                return new WalkFragment();
             default:
                 return null;
         }
@@ -42,6 +44,8 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 return "Connect";
             case 1:
                 return "Speak";
+            case 2:
+                return "Walk";
             default:
                 return null;
         }
