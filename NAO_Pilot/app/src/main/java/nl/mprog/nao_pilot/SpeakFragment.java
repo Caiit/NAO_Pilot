@@ -21,6 +21,7 @@ import android.widget.TextView;
 public class SpeakFragment extends Fragment {
 
     View view;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

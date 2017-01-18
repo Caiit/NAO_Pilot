@@ -55,15 +55,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             networkThread.setIP(IP);
             new Thread(networkThread).start();
             connectButton.setText("Disconnect");
-            JSONObject json = new JSONObject();
-            try {
-                json.put("type", "info");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            networkThread.sendMessage(json);
-            Log.d(String.valueOf(json), "connect: json");
-
         } else {
             Log.d(String.valueOf(networkThread), "connectRobot: closing thread");
             // Close thread

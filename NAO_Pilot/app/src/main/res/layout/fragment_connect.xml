@@ -40,19 +40,4 @@
         android:id="@+id/stiffBox"
         android:onClick="setStiffness"/>
 
-    <TextView
-        android:text="Name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:id="@+id/nameTextView" />
-
-    <TextView
-        android:text="Battery: "
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:id="@+id/batteryTextView" />
-
-
 </LinearLayout>

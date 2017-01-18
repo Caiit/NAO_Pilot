@@ -29,7 +29,8 @@ public class NetworkThread implements Runnable {
     private boolean shutdown = false;
     private DataInputStream in;
     private DataOutputStream out;
-    private Queue messageQueue = new LinkedList();
+    private Queue outMessages = new LinkedList();
+    private Queue inMessages = new LinkedList();
 
     public static NetworkThread getInstance() {
         if (thread == null) thread = new NetworkThread();
@@ -46,7 +47,7 @@ public class NetworkThread implements Runnable {
     public void run() {
         createSocket();
         while (!shutdown) {
-            handleMessage((JSONObject) messageQueue.poll());
+            handleMessage((JSONObject) outMessages.poll());
             receiveMessages();
         }
         // Close client
@@ -108,6 +109,13 @@ public class NetworkThread implements Runnable {
             if (in.available() > 0) {
                 byte[] bytes = new byte[in.available()];
                 in.read(bytes);
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject(new String(bytes));
+                    inMessages.add(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 Log.d("Server says: " + new String(bytes), "receiveMessages: ");
             }
         } catch (IOException e) {
@@ -128,7 +136,7 @@ public class NetworkThread implements Runnable {
     }
 
     void sendMessage(JSONObject message) {
-        messageQueue.add(message);
+        outMessages.add(message);
     }
 
     void closeThread() {

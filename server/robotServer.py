@@ -26,7 +26,6 @@ class networkThread (threading.Thread):
     def run(self):
         self.createServer()
         while (not self.shutdown):
-            print "looping"
             if (not self.connection):
                 self.connection, addr = self.serverSocket.accept()
                 print 'Connected with ' + addr[0] + ':' + str(addr[1])
@@ -57,13 +56,12 @@ class networkThread (threading.Thread):
 
 
     def receiveMessages(self):
-        print "Receiving"
         data = self.connection.recv(BUFFER_SIZE)[2:]
         if (not data):
             self.connection = None
             return
         try :
-            self.connection.send("Data received \0")
+            self.connection.send('{"type": "received", "text": "Data received"} \0')
         except socket.error:
             print 'Send failed'
 
@@ -80,19 +78,18 @@ class networkThread (threading.Thread):
             self.connection.send(self.outMessages.get())
 
 
-thread = networkThread()
 IP = "localhost"
 HOST = ''   # Symbolic name, meaning all available interfaces
 PORT = 3006 # Arbitrary non-privileged port
 MAX_CLIENTS = 5
 BUFFER_SIZE = 1024
 
+thread = networkThread()
+newMessage = False
 # Proxies
-# tts = ALProxy("ALTextToSpeech", IP, 9559)
-# motionProxy = ALProxy("ALMotion", IP, 9559)
-# postureProxy = ALProxy("ALRobotPosture", IP, 9559)
-# batteryProxy = ALProxy("ALBattery", IP, 9559)
-# systemProxy = ALProxy("ALSystem", IP, 9559)
+tts = ALProxy("ALTextToSpeech", IP, 9559)
+motionProxy = ALProxy("ALMotion", IP, 9559)
+postureProxy = ALProxy("ALRobotPosture", IP, 9559)
 
 def toJson(data):
     return json.loads(data)
@@ -112,33 +109,37 @@ def closeConnection(s):
 
 
 def stiffness(part, value):
-    print part
-    # if value == 0.0:
-    #     motionProxy.rest()
-    # motionProxy.setStiffnesses(part, value)
+    if value == 0.0:
+        motionProxy.rest()
+    motionProxy.setStiffnesses(part, value)
 
 
 def speak(data):
-    print data
-    # tts.setVolume(float(data["volume"])/100)
-    # pitch = float(data["pitch"]) / 100
-    # if pitch > 0.0 and pitch < 1.0: pitch = 1.0
-    # tts.setParameter("pitchShift", pitch)
-    # tts.say("\\rspd=" + str(data["speed"]) + "\\" + str(data["text"]))
+    tts.setVolume(float(data["volume"])/100)
+    pitch = float(data["pitch"]) / 100
+    if pitch > 0.0 and pitch < 1.0: pitch = 1.0
+    tts.setParameter("pitchShift", pitch)
+    tts.say("\\rspd=" + str(data["speed"]) + "\\" + str(data["text"]))
 
 
 def walk(data):
     print data
-    # if motionProxy.getStiffnesses("Body") < 0.8:
-    #     stiffness("Body", 1.0)
-    # postureProxy.goToPosture("StandInit", 0.5)
-    # motionProxy.move(float(data["x_speed"]), float(data["y_speed"]), 0)
+    if (float(data["x_speed"]) == 0 and float(data["y_speed"]) == 0):
+        motionProxy.stopMove()
+        postureProxy.goToPosture("StandInit", 0.5)
+    else:
+        if motionProxy.getStiffnesses("Body") < 0.8:
+            stiffness("Body", 1.0)
+        postureProxy.goToPosture("StandInit", 0.5)
+        motionProxy.moveToward(float(data["x_speed"]), float(data["y_speed"]), 0)
 
-def getRobotInfo(data):
+
+def turn(data):
     print data
-    # info = {"type": "info", "battery": battery.getBatteryCharge(), "name": systemProxy.robotName()}
-    info = {"type": "info", "battery": 15, "name": "BeepBoop"}
-    thread.outMessages.put(info)
+    if motionProxy.getStiffnesses("Body") < 0.8:
+        stiffness("Body", 1.0)
+    postureProxy.goToPosture("StandInit", 0.5)
+    motionProxy.moveToward(0, 0, float(data["speed"]))
 
 
 def handleMessages():
@@ -147,14 +148,14 @@ def handleMessages():
     dataType = data["type"]
     if dataType == "connect":
         print "Connecting: ", data["text"]
-    elif dataType == "info":
-        getRobotInfo(data)
     elif dataType == "stiffness":
         stiffness(str(data["part"]), float(data["value"]))
     elif dataType == "speak":
         speak(data)
     elif dataType == "walk":
         walk(data)
+    elif dataType == "turn":
+        turn(data)
     elif dataType == "disconnect":
         print "Disconnecting"
 
