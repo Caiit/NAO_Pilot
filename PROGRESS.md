@@ -37,3 +37,9 @@ Started on the walk fragment. The Networkthread is now a singleton. This caused 
 
 # day 7
 The robot walks when the user presses the arrow and stops on release. However, when the press is really short, it does not correctly send the release command (because they are too close after each other). This can be fixed by also using a separate thread on the robot for handling the connection. 
+
+# day 8
+A thread on the robot is implemented. The robot can now walk and turn without any problems and the speed can be adjusted. 
+
+# day 9
+Started with camera input. Problems: the server on the robot is blocking: it waits for a new incoming message. This results in not sending the data immediately. The user has to press first a take picture then a show picture button, because the data needs to be obtained from the messages from the thread. Would be nice if a on data change for a queue exists.
