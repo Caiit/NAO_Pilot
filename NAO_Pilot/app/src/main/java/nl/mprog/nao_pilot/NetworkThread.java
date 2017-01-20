@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -147,12 +148,9 @@ public class NetworkThread implements Runnable {
                 if (parts[0].charAt(0) != '{') {
                     Log.d(String.valueOf(parts[0].length()), "receiveMessages: len");
                     images.add(StringToBitMap(parts[0]));
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ((ImageView)view.findViewById(R.id.cameraView)).setImageBitmap(StringToBitMap(parts[0]));
-                        }
-                    });
+                    Message msg = Message.obtain();
+                    msg.obj = parts[0];
+                    handler.sendMessage(msg);
                 }
             }
         } catch (IOException e) {

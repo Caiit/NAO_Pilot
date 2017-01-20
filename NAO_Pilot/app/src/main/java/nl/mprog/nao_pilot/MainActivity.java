@@ -1,16 +1,21 @@
 package nl.mprog.nao_pilot;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -35,7 +40,15 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         addTabs();
 
         // Create handler
-        handler = new Handler();
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                Log.d(String.valueOf(msg), "handleMessage: msg");
+                // TODO: make switch
+                String image = (String) msg.obj;
+                setImage(image);
+            }
+        };
     }
 
     private void addTabs() {
@@ -116,6 +129,20 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }
     }
 
+    private void setImage(String image) {
+        Bitmap bitmap = null;
+        try {
+            byte[] encodeByte = Base64.decode(image, Base64.DEFAULT);
+            bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+
+        ImageView imgView = (ImageView) findViewById(R.id.cameraView);
+        if (image != null) {
+            imgView.setImageBitmap(bitmap);
+        }
+    }
 
     /**************** TABS *******************/
 
