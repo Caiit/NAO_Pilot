@@ -43,3 +43,6 @@ A thread on the robot is implemented. The robot can now walk and turn without an
 
 # day 9
 Started with camera input. Problems: the server on the robot is blocking: it waits for a new incoming message. This results in not sending the data immediately. The user has to press first a take picture then a show picture button, because the data needs to be obtained from the messages from the thread. Would be nice if a on data change for a queue exists.
+
+# day 10
+The camera input is fixed. When clicking the take picture button, a picture is shown. The server on the robot is now non-blocking. The app uses a handler and messages to handle the messages of the networkthread on the UI-thread (http://codetheory.in/android-handlers-runnables-loopers-messagequeue-handlerthread/). 
