@@ -38,6 +38,7 @@ public class CameraFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_camera, container, false);
         networkThread = NetworkThread.getInstance();
+        networkThread.setView(view);
         handleButtons();
         return view;
     }
@@ -73,5 +74,12 @@ public class CameraFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public void setImage(Bitmap image) {
+        ImageView imgView = (ImageView) view.findViewById(R.id.cameraView);
+        if (image != null) {
+            imgView.setImageBitmap(image);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package nl.mprog.nao_pilot;
 
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
     private NetworkThread networkThread;
+    private Handler handler;
     private ViewPager viewPager;
 
     @Override
@@ -31,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         // Add tabs
         addTabs();
+
+        // Create handler
+        handler = new Handler();
     }
 
     private void addTabs() {
@@ -51,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             // Start thread with robot connection
             networkThread = NetworkThread.getInstance();
             networkThread.setIP(IP);
+            networkThread.setHandler(handler);
             new Thread(networkThread).start();
             connectButton.setText("Disconnect");
         } else {
@@ -109,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             networkThread.sendMessage(json);
         }
     }
+
 
     /**************** TABS *******************/
 

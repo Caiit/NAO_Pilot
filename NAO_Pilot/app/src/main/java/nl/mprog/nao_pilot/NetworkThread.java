@@ -1,9 +1,13 @@
 package nl.mprog.nao_pilot;
 
+import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +33,8 @@ public class NetworkThread implements Runnable {
 
     private static NetworkThread thread = new NetworkThread();
     private String IP;
+    private View view;
+    private Handler handler;
     private Socket client;
     private boolean shutdown = false;
     private DataInputStream in;
@@ -48,6 +54,14 @@ public class NetworkThread implements Runnable {
 
     public void setIP(String IP) {
         this.IP = IP;
+    }
+
+    public void setView(View view) {
+        this.view = view;
+    }
+
+    public void setHandler(Handler handler) {
+        this.handler = handler;
     }
 
     public void run() {
@@ -120,7 +134,7 @@ public class NetworkThread implements Runnable {
                 buffer += message;
                 Log.d(String.valueOf(buffer.length()), "receiveMessages: buffer");
                 // Split message on end sign, begin is complete message, rest is new buffer
-                String[] parts = buffer.split("end \0");
+                final String[] parts = buffer.split("end \0");
                 Log.d(String.valueOf(parts.length), "receiveMessages: parts");
                 if (parts.length == 1 && !buffer.endsWith("end \0")) { return; }
                 if (parts.length > 1) {
@@ -133,6 +147,12 @@ public class NetworkThread implements Runnable {
                 if (parts[0].charAt(0) != '{') {
                     Log.d(String.valueOf(parts[0].length()), "receiveMessages: len");
                     images.add(StringToBitMap(parts[0]));
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((ImageView)view.findViewById(R.id.cameraView)).setImageBitmap(StringToBitMap(parts[0]));
+                        }
+                    });
                 }
             }
         } catch (IOException e) {
