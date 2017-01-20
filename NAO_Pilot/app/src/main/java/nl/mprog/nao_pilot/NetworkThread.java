@@ -1,5 +1,8 @@
 package nl.mprog.nao_pilot;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -12,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 /**
  * NAO Pilot
@@ -29,8 +33,10 @@ public class NetworkThread implements Runnable {
     private boolean shutdown = false;
     private DataInputStream in;
     private DataOutputStream out;
+    private String buffer;
     private Queue outMessages = new LinkedList();
     private Queue inMessages = new LinkedList();
+    private Queue images = new LinkedList();
 
     public static NetworkThread getInstance() {
         if (thread == null) thread = new NetworkThread();
@@ -65,7 +71,6 @@ public class NetworkThread implements Runnable {
 
     private void createSocket() {
         int port = 3006;
-        Log.d(String.valueOf(client), "createSocket: before");
         try {
             Log.d("Connecting to " + IP + " on port " + port, "createSocket: ");
             client = new Socket();
@@ -107,16 +112,28 @@ public class NetworkThread implements Runnable {
     private void receiveMessages() {
         try {
             if (in.available() > 0) {
+                // Read message
                 byte[] bytes = new byte[in.available()];
                 in.read(bytes);
-                JSONObject jsonObject;
-                try {
-                    jsonObject = new JSONObject(new String(bytes));
-                    inMessages.add(jsonObject);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                String message = new String(bytes);
+                // Add message to buffer, if no end sign in message, return
+                buffer += message;
+                Log.d(String.valueOf(buffer.length()), "receiveMessages: buffer");
+                // Split message on end sign, begin is complete message, rest is new buffer
+                String[] parts = buffer.split("end \0");
+                Log.d(String.valueOf(parts.length), "receiveMessages: parts");
+                if (parts.length == 1 && !buffer.endsWith("end \0")) { return; }
+                if (parts.length > 1) {
+                    buffer = parts[1];
+                } else {
+                    buffer = "";
                 }
-                Log.d("Server says: " + new String(bytes), "receiveMessages: ");
+                Log.d(buffer, "receiveMessages: test");
+                // Add image messages to images queue
+                if (parts[0].charAt(0) != '{') {
+                    Log.d(String.valueOf(parts[0].length()), "receiveMessages: len");
+                    images.add(StringToBitMap(parts[0]));
+                }
             }
         } catch (IOException e) {
             Log.d("Receiving failed", "receiveMessages: ");
@@ -139,7 +156,27 @@ public class NetworkThread implements Runnable {
         outMessages.add(message);
     }
 
+    public JSONObject getInMessage() {
+        Log.d(String.valueOf(inMessages.size()), "getInMessage: ");
+        return (JSONObject) inMessages.poll();
+    }
+
+    public Bitmap getImage() {
+        return (Bitmap) images.poll();
+    }
+
     void closeThread() {
         shutdown = true;
+    }
+
+    private Bitmap StringToBitMap(String encodedString) {
+        try {
+            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
     }
 }

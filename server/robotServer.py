@@ -2,12 +2,17 @@
 
 import threading
 import socket
+import errno
+import select
 import Queue
 import json
 import sys
 import atexit
 
 from naoqi import ALProxy
+import vision_definitions
+import Image
+import base64
 
 # ---------------- THREADING CLASS ----------------------------
 class networkThread (threading.Thread):
@@ -21,6 +26,9 @@ class networkThread (threading.Thread):
         self.inMessages = Queue.Queue()
         self.outMessages = Queue.Queue()
         self.buffer = ""
+        self.HOST = ""
+        self.PORT = 3006
+        self.BUFFER_SIZE = 1024
 
 
     def run(self):
@@ -28,8 +36,9 @@ class networkThread (threading.Thread):
         while (not self.shutdown):
             if (not self.connection):
                 self.connection, addr = self.serverSocket.accept()
+                self.connection.setblocking(0)
                 print 'Connected with ' + addr[0] + ':' + str(addr[1])
-                # TODO: maak mooi geluidje
+            #     # TODO: maak mooi geluidje
             self.receiveMessages()
             self.sendMessage()
         print "Closing server"
@@ -38,12 +47,13 @@ class networkThread (threading.Thread):
 
     def createServer(self):
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200000)
         self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print 'Socket created'
 
         # Bind socket to local host and port
         try:
-            self.serverSocket.bind((HOST, PORT))
+            self.serverSocket.bind((self.HOST, self.PORT))
         except socket.error as msg:
             print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
             sys.exit()
@@ -51,20 +61,39 @@ class networkThread (threading.Thread):
         print 'Socket bind complete'
 
         # Start listening on socket
-        self.serverSocket.listen(MAX_CLIENTS)
+        self.serverSocket.listen(1)
         print 'Socket now listening'
+        # self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # self.serverSocket.setblocking(0)
+        # self.ready = select.select([self.serverSocket], [], [], 1)
 
 
     def receiveMessages(self):
-        data = self.connection.recv(BUFFER_SIZE)[2:]
-        if (not data):
-            self.connection = None
-            return
+        data = ""
+        try:
+            data = self.connection.recv(self.BUFFER_SIZE)[2:]
+        except IOError as e:  # and here it is handeled
+            if e.errno == errno.EWOULDBLOCK:
+                return
+            else:
+                self.connection = None
+        if (data == ""): return
+        # if (not data):
+        #     self.connection = None
+        #     return
         try :
-            self.connection.send('{"type": "received", "text": "Data received"} \0')
+            self.connection.send('{"type": "received", "text": "Data received"} end \0')
         except socket.error:
             print 'Send failed'
-
+        # data = ""
+        # try:
+        #     data = self.serverSocket.recv(self.BUFFER_SIZE)
+        # except socket.error:
+        #     # no data yet
+        #     return
+        #
+        # print data
         # Make sure message is correct json message
         self.buffer += data
         if ('}' not in self.buffer): return
@@ -75,7 +104,13 @@ class networkThread (threading.Thread):
 
     def sendMessage(self):
         if (self.connection and not self.outMessages.empty()):
-            self.connection.send(self.outMessages.get())
+            self.connection.send(self.outMessages.get_nowait())
+        # if (not self.outMessages.empty()):
+        #     try:
+        #         self.serverSocket.send(self.outMessages.get_nowait())
+        #     except socket.error:
+        #         # no connection yet
+        #         return
 
 
 IP = "localhost"
@@ -85,11 +120,12 @@ MAX_CLIENTS = 5
 BUFFER_SIZE = 1024
 
 thread = networkThread()
-newMessage = False
+
 # Proxies
 tts = ALProxy("ALTextToSpeech", IP, 9559)
 motionProxy = ALProxy("ALMotion", IP, 9559)
 postureProxy = ALProxy("ALRobotPosture", IP, 9559)
+camProxy = ALProxy("ALVideoDevice", IP, 9559)
 
 def toJson(data):
     return json.loads(data)
@@ -142,6 +178,34 @@ def turn(data):
     motionProxy.moveToward(0, 0, float(data["speed"]))
 
 
+def takePicture(data):
+    resolution = vision_definitions.kQVGA
+    colorSpace = vision_definitions.kRGBColorSpace
+    fps = 20
+
+    nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
+
+    print 'getting images in remote'
+    naoImage = camProxy.getImageRemote(nameId)
+    camProxy.unsubscribe(nameId)
+
+    # Get the image size and pixel array.
+    imageWidth = naoImage[0]
+    imageHeight = naoImage[1]
+    array = naoImage[6]
+
+    # Create a PIL Image from our pixel array.
+    im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
+
+    # Save the image.
+    im.save("camImage.png", "PNG")
+
+    with open("camImage.png", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    image_file.close()
+    thread.outMessages.put(encoded_string + 'end \0')
+
+
 def handleMessages():
     data = toJson(thread.inMessages.get())
 
@@ -156,6 +220,8 @@ def handleMessages():
         walk(data)
     elif dataType == "turn":
         turn(data)
+    elif dataType == "picture":
+        takePicture(data)
     elif dataType == "disconnect":
         print "Disconnecting"
 
@@ -165,6 +231,7 @@ def main():
     thread.start()
     while (True):
         handleMessages()
+
 
 if __name__ == "__main__":
     main()
