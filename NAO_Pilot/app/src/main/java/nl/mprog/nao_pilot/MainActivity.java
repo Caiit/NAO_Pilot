@@ -59,6 +59,12 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         tabLayout.setupWithViewPager(viewPager);
+
+        tabLayout.getTabAt(0).setIcon(R.drawable.connect);
+        tabLayout.getTabAt(1).setIcon(R.drawable.speak);
+        tabLayout.getTabAt(2).setIcon(R.drawable.walk);
+        tabLayout.getTabAt(3).setIcon(R.drawable.camera);
+        tabLayout.getTabAt(4).setIcon(R.drawable.moves);
     }
 
     public void connectRobot(View view) {
@@ -139,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }
 
         ImageView imgView = (ImageView) findViewById(R.id.cameraView);
-        if (image != null) {
+        if (imgView != null && image != null) {
             imgView.setImageBitmap(bitmap);
         }
     }

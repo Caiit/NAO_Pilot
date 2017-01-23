@@ -61,25 +61,14 @@ public class CameraFragment extends Fragment {
             }
         });
 
-        Button showPicture = (Button) view.findViewById(R.id.savePictureButton);
-        showPicture.setOnClickListener(new View.OnClickListener() {
+        Button savePicture = (Button) view.findViewById(R.id.savePictureButton);
+        savePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (networkThread != null) {
-                    Bitmap image = networkThread.getImage();
-                    ImageView imgView = (ImageView) view.findViewById(R.id.cameraView);
-                    if (image != null) {
-                        imgView.setImageBitmap(image);
-                    }
+                    // TODO: save picture
                 }
             }
         });
-    }
-
-    public void setImage(Bitmap image) {
-        ImageView imgView = (ImageView) view.findViewById(R.id.cameraView);
-        if (image != null) {
-            imgView.setImageBitmap(image);
-        }
     }
 }

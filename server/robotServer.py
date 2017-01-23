@@ -28,7 +28,7 @@ class networkThread (threading.Thread):
         self.buffer = ""
         self.HOST = ""
         self.PORT = 3006
-        self.BUFFER_SIZE = 1024
+        self.BUFFER_SIZE = 10000
 
 
     def run(self):
@@ -206,7 +206,19 @@ def takePicture(data):
     thread.outMessages.put(encoded_string + 'end \0')
 
 
+def moves(data):
+    code = data["file"]
+    try:
+        exec(code)
+        motionProxy.angleInterpolationBezier(names, times, keys)
+    except:
+        thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"} end \0')
+
+
 def handleMessages():
+    if thread.inMessages.empty():
+        return
+
     data = toJson(thread.inMessages.get())
 
     dataType = data["type"]
@@ -222,12 +234,15 @@ def handleMessages():
         turn(data)
     elif dataType == "picture":
         takePicture(data)
+    elif dataType == "moves":
+        moves(data)
     elif dataType == "disconnect":
         print "Disconnecting"
 
 
 def main():
     atexit.register(onExit)
+    thread.daemon = True
     thread.start()
     while (True):
         handleMessages()

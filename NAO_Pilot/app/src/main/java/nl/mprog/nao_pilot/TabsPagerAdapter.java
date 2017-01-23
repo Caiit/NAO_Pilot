@@ -19,7 +19,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -34,24 +34,28 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
                 return new WalkFragment();
             case 3:
                 return new CameraFragment();
+            case 4:
+                return new MovesFragment();
             default:
                 return null;
         }
     }
 
-    @Override
-    public CharSequence getPageTitle(int pos) {
-        switch(pos) {
-            case 0:
-                return "Connect";
-            case 1:
-                return "Speak";
-            case 2:
-                return "Walk";
-            case 3:
-                return "Camera";
-            default:
-                return null;
-        }
-    }
+//    @Override
+//    public CharSequence getPageTitle(int pos) {
+//        switch(pos) {
+//            case 0:
+//                return "Connect";
+//            case 1:
+//                return "Speak";
+//            case 2:
+//                return "Walk";
+//            case 3:
+//                return "Camera";
+//            case 4:
+//                return "Moves";
+//            default:
+//                return null;
+//        }
+//    }
 }

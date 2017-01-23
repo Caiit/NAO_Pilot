@@ -1,6 +1,5 @@
 package nl.mprog.nao_pilot;
 
-import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -8,7 +7,6 @@ import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +18,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.regex.Pattern;
 
 /**
  * NAO Pilot
@@ -74,7 +71,7 @@ public class NetworkThread implements Runnable {
         // Close client
         try {
             if (out != null) {
-                out.writeUTF(toJson("disconnect", "Closing connection from the app."));
+                out.writeUTF(toJson("disconnect", "Closing connection from the app.").toString());
                 Log.d("Closed successfully", "run: Connection closed");
             }
             client.close();
@@ -97,7 +94,7 @@ public class NetworkThread implements Runnable {
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
             // Send message to tell connection is created
-            out.writeUTF(toJson("connect", "Hello robot from the app."));
+            out.writeUTF(toJson("connect", "Hello robot from the app.").toString());
 
             // Wait until message from server available
             while (in.available() == 0) {
@@ -113,7 +110,7 @@ public class NetworkThread implements Runnable {
         }
     }
 
-    private String toJson(String type, String message) {
+    private JSONObject toJson(String type, String message) {
         JSONObject json = new JSONObject();
         try {
             json.put("type", type);
@@ -121,7 +118,7 @@ public class NetworkThread implements Runnable {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return json.toString();
+        return json;
     }
 
     private void receiveMessages() {
