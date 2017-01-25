@@ -16,6 +16,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -94,20 +97,30 @@ public class NetworkThread implements Runnable {
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
             // Send message to tell connection is created
-            out.writeUTF(toJson("connect", "Hello robot from the app.").toString());
-
-            // Wait until message from server available
-            while (in.available() == 0) {
-            }
-
-            byte[] bytes = new byte[in.available()];
-            in.read(bytes);
-            Log.d("Server says: " + new String(bytes), "createSocket: ");
+//            out.writeUTF(toJson("connect", "Hello robot from the app.").toString());
+//
+//            // Wait until message from server available
+//            while (in.available() == 0) {
+//            }
+//
+//            byte[] bytes = new byte[in.available()];
+//            in.read(bytes);
+//            Log.d("Server says: " + fromBytes(bytes), "createSocket: ");
         } catch (IOException e) {
             Log.d("Could not connect", "createSocket: No connection possible");
             e.printStackTrace();
             shutdown = true;
         }
+    }
+
+    private String fromBytes( byte[] bytes) {
+        for (int i = bytes.length-1; i > 0 ; --i)
+        {
+            if (bytes[i] == 0) {
+                return new String(bytes, 0, i);
+            }
+        }
+        return new String(bytes);
     }
 
     private JSONObject toJson(String type, String message) {
@@ -124,31 +137,57 @@ public class NetworkThread implements Runnable {
     private void receiveMessages() {
         try {
             if (in.available() > 0) {
+                // Get size of messsage
+                byte[] byteSize = new byte[8];
+                in.read(byteSize);
+                int size = Integer.parseInt(new String(byteSize));
+                Log.d(String.valueOf(size), "receiveMessages: size");
                 // Read message
-                byte[] bytes = new byte[in.available()];
-                in.read(bytes);
-                String message = new String(bytes);
-                // Add message to buffer, if no end sign in message, return
-                buffer += message;
-                Log.d(String.valueOf(buffer.length()), "receiveMessages: buffer");
-                // Split message on end sign, begin is complete message, rest is new buffer
-                final String[] parts = buffer.split("end \0");
-                Log.d(String.valueOf(parts.length), "receiveMessages: parts");
-                if (parts.length == 1 && !buffer.endsWith("end \0")) { return; }
-                if (parts.length > 1) {
-                    buffer = parts[1];
-                } else {
-                    buffer = "";
+                String message = "";
+                String error = "";
+                while (in.available() < size )
+                {
+//                    System.out.println("bytes avail: " + in.available());
                 }
-                Log.d(buffer, "receiveMessages: test");
-                // Add image messages to images queue
-                if (parts[0].charAt(0) != '{') {
-                    Log.d(String.valueOf(parts[0].length()), "receiveMessages: len");
-                    images.add(StringToBitMap(parts[0]));
-                    Message msg = Message.obtain();
-                    msg.obj = parts[0];
-                    handler.sendMessage(msg);
+                while (message.length() < size - 1 ) {
+                    int bufferSize = size - message.length();
+
+                    byte[] byteMessage = new byte[bufferSize];
+                    int bytesAvailable = in.available();
+                    int bytesRead = in.read(byteMessage);
+                    if (bufferSize > 0 ) {
+                        Log.d(size + ", " + bytesAvailable + ", " + bytesRead + ", " + message.length(), "receiveMessages: buffersize");
+                    }
+
+                    byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
+                    message += fromBytes(validBytes);
                 }
+                Log.d(String.valueOf(message.length()), "receiveMessages: string length");
+                System.out.println("<" + message.substring(Math.max(0, size - 500)) + ">");
+                // Split message on end sign and delete rest
+//                String[] parts = message.split(" end \0");
+//                // Add message to buffer, if no end sign in message, return
+//                buffer += message;
+//                // Split message on end sign, begin is complete message, rest is new buffer
+//                final String[] parts = buffer.split("end \0");
+//                if (parts.length == 1 && !buffer.endsWith("end \0")) { return; }
+//                if (parts.length > 1) {
+//                    buffer = parts[1];
+//                } else {
+//                    buffer = "";
+//                }
+                // Add message to the messages handler of the main thread
+                Message msg = Message.obtain();
+                msg.obj = message;
+//                String truth = new String( new char[50000]).replace("\0", "abcdefg");
+//                truth += "h";
+//                if (message.equals(truth)) {
+//                    System.out.println("MESSAGE CORRECT");
+//
+//                } else {
+//                    System.out.println("WRONG WRONG WRONG");
+//                }
+                handler.sendMessage(msg);
             }
         } catch (IOException e) {
             Log.d("Receiving failed", "receiveMessages: ");
@@ -171,27 +210,7 @@ public class NetworkThread implements Runnable {
         outMessages.add(message);
     }
 
-    public JSONObject getInMessage() {
-        Log.d(String.valueOf(inMessages.size()), "getInMessage: ");
-        return (JSONObject) inMessages.poll();
-    }
-
-    public Bitmap getImage() {
-        return (Bitmap) images.poll();
-    }
-
     void closeThread() {
         shutdown = true;
-    }
-
-    private Bitmap StringToBitMap(String encodedString) {
-        try {
-            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-            return bitmap;
-        } catch (Exception e) {
-            e.getMessage();
-            return null;
-        }
     }
 }

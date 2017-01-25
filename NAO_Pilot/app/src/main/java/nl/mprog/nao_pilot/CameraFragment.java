@@ -1,5 +1,7 @@
 package nl.mprog.nao_pilot;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
@@ -43,6 +45,27 @@ public class CameraFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (networkThread != null) {
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "picture");
+                if (isVisibleToUser) {
+                    // TODO: add settings
+                    json.put("get", "true");
+                } else {
+                    json.put("get", "false");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
+        }
+    }
+
     private void handleButtons() {
         Button takePicture = (Button) view.findViewById(R.id.takePictureButton);
         takePicture.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +76,7 @@ public class CameraFragment extends Fragment {
                     JSONObject json = new JSONObject();
                     try {
                         json.put("type", "picture");
+                        json.put("get", "true");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

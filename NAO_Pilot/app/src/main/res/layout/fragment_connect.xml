@@ -16,6 +16,7 @@
         android:textSize="20sp"/>
 
     <EditText
+        android:text="192.168.122.1"
         android:layout_weight="0.9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

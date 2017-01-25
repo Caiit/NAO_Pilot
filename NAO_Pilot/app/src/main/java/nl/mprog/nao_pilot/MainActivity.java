@@ -43,10 +43,20 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                Log.d(String.valueOf(msg), "handleMessage: msg");
+                Log.d(String.valueOf(((String)msg.obj).length()), "handleMessage: msg");
                 // TODO: make switch
-                String image = (String) msg.obj;
-                setImage(image);
+                JSONObject message = null;
+                try {
+                    message = new JSONObject( (String)msg.obj);
+                    if (message.getString("type").equals("picture")) {
+                        setImage(message.getString("img"));
+                    }
+                    else {
+                        Log.d(String.valueOf(message), "handleMessage: no image");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -142,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch (Exception e) {
             e.getMessage();
+            Log.d("No valid image", "setImage: Failed");
+            return;
         }
 
         ImageView imgView = (ImageView) findViewById(R.id.cameraView);

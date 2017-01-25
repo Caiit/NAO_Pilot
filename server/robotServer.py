@@ -9,7 +9,7 @@ import json
 import sys
 import atexit
 
-from naoqi import ALProxy
+#NAO from naoqi import ALProxy
 import vision_definitions
 import Image
 import base64
@@ -28,7 +28,7 @@ class networkThread (threading.Thread):
         self.buffer = ""
         self.HOST = ""
         self.PORT = 3006
-        self.BUFFER_SIZE = 10000
+        self.BUFFER_SIZE = 100000
 
 
     def run(self):
@@ -47,7 +47,7 @@ class networkThread (threading.Thread):
 
     def createServer(self):
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200000)
+        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 99999999)
         self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print 'Socket created'
 
@@ -79,21 +79,15 @@ class networkThread (threading.Thread):
             else:
                 self.connection = None
         if (data == ""): return
-        # if (not data):
-        #     self.connection = None
-        #     return
-        try :
-            self.connection.send('{"type": "received", "text": "Data received"} end \0')
-        except socket.error:
-            print 'Send failed'
-        # data = ""
-        # try:
-        #     data = self.serverSocket.recv(self.BUFFER_SIZE)
-        # except socket.error:
-        #     # no data yet
-        #     return
+
+        # try :
+        #     message = '{"type": "received", "text": "Data received"}'
         #
-        # print data
+        #     self.outMessages.put(message)
+        #     self.sendMessage()
+        # except socket.error:
+        #     print 'Send failed'
+
         # Make sure message is correct json message
         self.buffer += data
         if ('}' not in self.buffer): return
@@ -104,7 +98,13 @@ class networkThread (threading.Thread):
 
     def sendMessage(self):
         if (self.connection and not self.outMessages.empty()):
-            self.connection.send(self.outMessages.get_nowait())
+            message = self.outMessages.get_nowait().encode("UTF-8") + chr(0)
+            # message = 50000 * "abcdefg" + "h" + chr(0)
+            size = len(message)
+            sendString = str(size).zfill(8) + message
+            print "0's in message: ", message.count(chr(0))
+            print "bytes: ", str(size).zfill(8)
+            self.connection.send(sendString)
         # if (not self.outMessages.empty()):
         #     try:
         #         self.serverSocket.send(self.outMessages.get_nowait())
@@ -120,15 +120,20 @@ MAX_CLIENTS = 5
 BUFFER_SIZE = 1024
 
 thread = networkThread()
+send = "status"
 
 # Proxies
-tts = ALProxy("ALTextToSpeech", IP, 9559)
-motionProxy = ALProxy("ALMotion", IP, 9559)
-postureProxy = ALProxy("ALRobotPosture", IP, 9559)
-camProxy = ALProxy("ALVideoDevice", IP, 9559)
+#NAO tts = ALProxy("ALTextToSpeech", IP, 9559)
+#NAO motionProxy = ALProxy("ALMotion", IP, 9559)
+#NAO postureProxy = ALProxy("ALRobotPosture", IP, 9559)
+#NAO camProxy = ALProxy("ALVideoDevice", IP, 9559)
 
 def toJson(data):
-    return json.loads(data)
+    try:
+        return json.loads(data)
+    except:
+        print "No valid json"
+        return {"type": "error"}
 
 
 def onExit():
@@ -178,32 +183,39 @@ def turn(data):
     motionProxy.moveToward(0, 0, float(data["speed"]))
 
 
-def takePicture(data):
-    resolution = vision_definitions.kQVGA
-    colorSpace = vision_definitions.kRGBColorSpace
-    fps = 20
-
-    nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
-
-    print 'getting images in remote'
-    naoImage = camProxy.getImageRemote(nameId)
-    camProxy.unsubscribe(nameId)
-
-    # Get the image size and pixel array.
-    imageWidth = naoImage[0]
-    imageHeight = naoImage[1]
-    array = naoImage[6]
-
-    # Create a PIL Image from our pixel array.
-    im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
-
-    # Save the image.
-    im.save("camImage.png", "PNG")
-
-    with open("camImage.png", "rb") as image_file:
+def takePicture():
+    global send
+    # resolution = vision_definitions.kQVGA
+    # colorSpace = vision_definitions.kRGBColorSpace
+    # fps = 20
+    #
+    # nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
+    #
+    # print 'getting images in remote'
+    # naoImage = camProxy.getImageRemote(nameId)
+    # camProxy.unsubscribe(nameId)
+    #
+    # if not naoImage: return
+    #
+    # # Get the image size and pixel array.
+    # imageWidth = naoImage[0]
+    # imageHeight = naoImage[1]
+    # array = naoImage[6]
+    #
+    # # Create a PIL Image from our pixel array.
+    # im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
+    #
+    # # Save the image.
+    # im.save("camImage.png", "PNG")
+    #
+    # with open("camImage.png", "rb") as image_file:
+    with open("robot.png", "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
     image_file.close()
-    thread.outMessages.put(encoded_string + 'end \0')
+    thread.outMessages.put('{"type": "picture", "img": "' + encoded_string + '"}')
+    send = "nothing"
+
+    # thread.outMessages.put("DEBUG")
 
 
 def moves(data):
@@ -212,10 +224,11 @@ def moves(data):
         exec(code)
         motionProxy.angleInterpolationBezier(names, times, keys)
     except:
-        thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"} end \0')
+        thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"}')
 
 
 def handleMessages():
+    global send
     if thread.inMessages.empty():
         return
 
@@ -233,11 +246,20 @@ def handleMessages():
     elif dataType == "turn":
         turn(data)
     elif dataType == "picture":
-        takePicture(data)
+        # takePicture(data)
+        if data["get"] == "true":
+            send = "picture"
+        else:
+            send = "nothing"
     elif dataType == "moves":
         moves(data)
     elif dataType == "disconnect":
         print "Disconnecting"
+
+
+def sendMessage():
+    if send == "picture":
+        takePicture()
 
 
 def main():
@@ -246,6 +268,7 @@ def main():
     thread.start()
     while (True):
         handleMessages()
+        sendMessage()
 
 
 if __name__ == "__main__":
