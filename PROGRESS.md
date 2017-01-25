@@ -46,3 +46,9 @@ Started with camera input. Problems: the server on the robot is blocking: it wai
 
 # day 10
 The camera input is fixed. When clicking the take picture button, a picture is shown. The server on the robot is now non-blocking. The app uses a handler and messages to handle the messages of the networkthread on the UI-thread (http://codetheory.in/android-handlers-runnables-loopers-messagequeue-handlerthread/). 
+
+# day 11
+The special moves via files is fixed. The app reads in a file, stored in the assets directory, and sends it to the robot. This file is python code containing three lists: times, joint names and joint values. 
+
+# day 12
+To get more "real time" (it is still with a delay) images instead of clicking a button to get an image, the app now sends a message to obtain images when the user switches to the camera tab and sends a message to stop when switching to another tab. The robot sends camera images every cycle. Images are often still not correctly send (data is missing). To avoid this, I want to send the size of a message in front of the message string, so the receiver knows how much to read. 
