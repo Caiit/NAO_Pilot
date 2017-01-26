@@ -9,4 +9,11 @@
         android:layout_height="wrap_content"
         app:srcCompat="@mipmap/ic_launcher"
         android:id="@+id/waveButton" />
+
+    <Button
+        android:text="Guitar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@mipmap/ic_launcher"
+        android:id="@+id/guitarButton" />
 </LinearLayout>

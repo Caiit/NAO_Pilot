@@ -1,11 +1,15 @@
 package nl.mprog.nao_pilot;
 
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -20,14 +24,105 @@ import org.json.JSONObject;
  * Connect the app with the robot.
  */
 
-public class ConnectFragment extends Fragment {
+public class ConnectFragment extends Fragment implements View.OnClickListener {
 
     View view;
+    NetworkThread networkThread;
+    Handler handler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_connect, container, false);
+        networkThread = NetworkThread.getInstance();
+        networkThread.setView(view);
+//        handler = ((MainActivity) getActivity()).getHandler();
+        Log.d("TEST", "onCreateView: CREATE CONNECT FRAGMENT");
+
+        setConnectButton();
+        // Set listeners
+//        view.findViewById(R.id.connectButton).setOnClickListener(this);
+        view.findViewById(R.id.stiffBox).setOnClickListener(this);
         return view;
+    }
+
+    private void setConnectButton() {
+        if (networkThread != null) {
+            ((TextView) view.findViewById(R.id.connectButton)).setText("Disconnect");
+        } else {
+            ((TextView) view.findViewById(R.id.connectButton)).setText("Connect");
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (networkThread != null) {
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "info");
+                if (isVisibleToUser) {
+                    Log.d("start info", "setUserVisibleHint: visible");
+                    // TODO: add settings
+                    json.put("get", "true");
+                } else {
+                    Log.d("stop info", "setUserVisibleHint: not visible");
+                    json.put("get", "false");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+//            case R.id.connectButton:
+//                if (networkThread == null) {
+//                    String IP = ((EditText) view.findViewById(R.id.IP)).getText().toString();
+//
+//                    // Start thread with robot connection
+//                    networkThread = NetworkThread.getInstance();
+//                    networkThread.setIP(IP);
+//                    networkThread.setHandler(handler);
+//                    new Thread(networkThread).start();
+//                    ((TextView)v).setText("Disconnect");
+//                } else {
+//                    Log.d(String.valueOf(networkThread), "connectRobot: closing thread");
+//                    // Close thread
+//                    if (networkThread != null) {
+//                        networkThread.closeThread();
+//                        networkThread = null;
+//                    }
+//                    ((TextView)v).setText("Connect");
+//                }
+//                break;
+            case R.id.stiffBox:
+                CheckBox stiffness = (CheckBox) v;
+                if (networkThread == null) {
+                    stiffness.setChecked(false);
+                } else {
+                    Log.d(String.valueOf(stiffness.isChecked()), "onClick: ");
+                    int value = 0;
+                    if (stiffness.isChecked()) {
+                        value = 1;
+                    }
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("type", "stiffness");
+                        json.put("part", "Body");
+                        json.put("value", value);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    networkThread.sendMessage(json);
+                    Log.d(String.valueOf(json), "setStiffness: json");
+                }
+                break;
+            default:
+        }
     }
 }

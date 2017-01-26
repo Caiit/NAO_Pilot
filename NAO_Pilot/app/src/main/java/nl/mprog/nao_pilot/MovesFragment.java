@@ -37,7 +37,7 @@ import java.io.OutputStream;
  * Take a picture with the robot.
  */
 
-public class MovesFragment extends Fragment {
+public class MovesFragment extends Fragment implements View.OnClickListener {
 
     View view;
     NetworkThread networkThread;
@@ -48,52 +48,78 @@ public class MovesFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_moves, container, false);
         networkThread = NetworkThread.getInstance();
         networkThread.setView(view);
-        handleButtons();
+//        handleButtons();
+
+        // Set button listeners
+        view.findViewById(R.id.waveButton).setOnClickListener(this);
+        view.findViewById(R.id.guitarButton).setOnClickListener(this);
+
         return view;
     }
 
-    private void handleButtons() {
-        ImageButton waveButton = (ImageButton) view.findViewById(R.id.waveButton);
-        waveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (networkThread != null) {
-                    // Read in file
-//                    byte[] byteFile = new byte[0];
+//    private void handleButtons() {
+//        ImageButton waveButton = (ImageButton) view.findViewById(R.id.waveButton);
+//        waveButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (networkThread != null) {
+//                     JSONObject json = new JSONObject();
 //                    try {
-//                        File file = new File(getContext().getAssets() + "wave.txt");
-//                        Log.d(String.valueOf(file), "onClick: file");
-//                        byteFile  = new byte [(int)file.length()];
-//                        FileInputStream fis = new FileInputStream(file);
-//                        BufferedInputStream bis = new BufferedInputStream(fis);
-//                        bis.read(byteFile, 0, byteFile.length);
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
+//                        InputStream is = getContext().getAssets().open("wave.txt");
+//                        int size = is.available();
+//                        byte[] byteFile = new byte[size];
+//                        is.read(byteFile);
+//                        is.close();
+//                        // Convert the buffer into a string.
+//                        String file = new String(byteFile);
+//                        json.put("type", "moves");
+//                        json.put("file", file);
+//                        System.out.println(file.length());
+//                        networkThread.sendMessage(json);
 //                    } catch (IOException e) {
 //                        e.printStackTrace();
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
 //                    }
+//                }
+//            }
+//        });
+//    }
 
+    @Override
+    public void onClick(View view) {
+        String fileName = "";
+        switch (view.getId()) {
+            // TODO: logische knopjes maken en function toevoegen
+            case R.id.waveButton:
+                fileName = "wave.txt";
+                break;
+            case R.id.guitarButton:
+                fileName = "guitar.txt";
+                break;
+            default:
+                break;
+        }
 
-                    JSONObject json = new JSONObject();
-                    try {
-                        InputStream is = getContext().getAssets().open("wave.txt");
-                        int size = is.available();
-                        byte[] byteFile = new byte[size];
-                        is.read(byteFile);
-                        is.close();
-                        // Convert the buffer into a string.
-                        String file = new String(byteFile);
-                        json.put("type", "moves");
-                        json.put("file", file);
-                        System.out.println(file.length());
-                        networkThread.sendMessage(json);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+        if (networkThread != null && !fileName.equals("")) {
+            JSONObject json = new JSONObject();
+            try {
+                InputStream is = getContext().getAssets().open(fileName);
+                int size = is.available();
+                byte[] byteFile = new byte[size];
+                is.read(byteFile);
+                is.close();
+                // Convert the buffer into a string.
+                String file = new String(byteFile);
+                json.put("type", "moves");
+                json.put("file", file);
+                System.out.println(file.length());
+                networkThread.sendMessage(json);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
+        }
     }
 }

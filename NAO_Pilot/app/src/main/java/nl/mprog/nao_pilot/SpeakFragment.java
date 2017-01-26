@@ -27,6 +27,7 @@ public class SpeakFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_speak, container, false);
         handleSeekbars();
+        Log.d("SPEAK FRAGMENT", "onCreateView: ON CREATE VIEW");
         return view;
     }
 

@@ -70,19 +70,31 @@ class networkThread (threading.Thread):
 
 
     def receiveMessages(self):
-        data = ""
+        size = 0
         try:
-            data = self.connection.recv(self.BUFFER_SIZE)[2:]
+            msg = self.connection.recv(10)[2:]
+            if (not msg == ""):
+                size = int(msg)
         except IOError as e:  # and here it is handeled
             if e.errno == errno.EWOULDBLOCK:
                 # Waiting for new message
                 return
             print "Other problem with connection: closed"
             self.connection = None
-        if (data == ""):
+        if (not size):
             self.connection = None
             return
 
+        print size
+        try:
+            data = self.connection.recv(size)
+            while (len(data) < size):
+                data += self.connection.recv(size - len(data))
+        except Exception as e:
+            raise
+
+        print "data: ", data
+        self.inMessages.put(data)
         # try :
         #     message = '{"type": "received", "text": "Data received"}'
         #
@@ -92,11 +104,11 @@ class networkThread (threading.Thread):
         #     print 'Send failed'
 
         # Make sure message is correct json message
-        self.buffer += data
-        if ('}' not in self.buffer): return
-        begin, end, self.buffer = self.buffer.partition('}')
-        message = begin + end
-        self.inMessages.put(message)
+        # self.buffer += data
+        # if ('}' not in self.buffer): return
+        # begin, end, self.buffer = self.buffer.partition('}')
+        # message = begin + end
+        # self.inMessages.put(message)
 
 
     def sendMessage(self):
@@ -105,8 +117,8 @@ class networkThread (threading.Thread):
             # message = 50000 * "abcdefg" + "h" + chr(0)
             size = len(message)
             sendString = str(size).zfill(8) + message
-            print "0's in message: ", message.count(chr(0))
-            print "bytes: ", str(size).zfill(8)
+            # print "0's in message: ", message.count(chr(0))
+            # print "bytes: ", str(size).zfill(8)
             self.connection.send(sendString)
         # if (not self.outMessages.empty()):
         #     try:
@@ -172,15 +184,13 @@ def walk(data):
     ySpeed = float(data["y_speed"])
     thetaSpeed = float(data["theta_speed"])
     if (xSpeed == 0 and ySpeed == 0 and thetaSpeed == 0):
-        print "Stop walking"
-        # motionProxy.stopMove()
-        # postureProxy.goToPosture("StandInit", 0.5)
+        motionProxy.stopMove()
+        postureProxy.goToPosture("StandInit", 0.5)
     else:
-        print "Walking with: ", xSpeed, ySpeed, thetaSpeed
-        # if motionProxy.getStiffnesses("Body") < 0.8:
-        #     stiffness("Body", 1.0)
-        # postureProxy.goToPosture("StandInit", 0.5)
-        # motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
+        if motionProxy.getStiffnesses("Body") < 0.8:
+            stiffness("Body", 1.0)
+        postureProxy.goToPosture("StandInit", 0.5)
+        motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
 
 
 # TODO: can be deleted if walk works
@@ -250,14 +260,12 @@ def handleMessages():
     elif dataType == "turn":
         turn(data)
     elif dataType == "picture":
-        # takePicture(data)
         if data["get"] == "true":
             send = "picture"
         else:
             send = "nothing"
     elif dataType == "moves":
-        # moves(data)
-        print  "dancing"
+        moves(data)
     elif dataType == "disconnect":
         print "Disconnecting"
 

@@ -78,7 +78,7 @@ public class NetworkThread implements Runnable {
         // Close client
         try {
             if (out != null) {
-                out.writeUTF(toJson("disconnect", "Closing connection from the app.").toString());
+                outMessages.add((toJson("disconnect", "Closing connection from the app.").toString()));
                 Log.d("Closed successfully", "run: Connection closed");
             }
             client.close();
@@ -157,6 +157,7 @@ public class NetworkThread implements Runnable {
                 String error = "";
                 while (in.available() < size )
                 {
+                    // TODO: timer toeveogen
 //                    System.out.println("bytes avail: " + in.available());
                 }
                 while (message.length() < size - 1 ) {
@@ -188,7 +189,11 @@ public class NetworkThread implements Runnable {
     private void handleMessage(JSONObject message) {
         try {
             if (out != null && message != null) {
-                out.writeUTF(message.toString());
+                Log.d(String.valueOf(message), "handleMessage: message");
+                String strMessage = message.toString();
+                String len = String.format("%08d", strMessage.length());
+                System.out.println(len + strMessage);
+                out.writeUTF(len + strMessage);
             }
         } catch (IOException e) {
             e.printStackTrace();

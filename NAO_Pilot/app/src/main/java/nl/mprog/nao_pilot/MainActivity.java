@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             public void handleMessage(Message msg) {
                 Log.d(String.valueOf(((String)msg.obj).length()), "handleMessage: msg");
                 // TODO: make switch
-                JSONObject message = null;
+                JSONObject message;
                 try {
                     message = new JSONObject( (String)msg.obj);
                     if (message.getString("type").equals("picture")) {
@@ -77,10 +77,36 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         tabLayout.getTabAt(4).setIcon(R.drawable.moves);
     }
 
+    public Handler getHandler() {
+        return handler;
+    }
+
+    public void setStiffness(View view) {
+//        CheckBox stiffness = (CheckBox) view;
+//        if (networkThread != null) {
+//            int value = 0;
+//            if (stiffness.isChecked()) {
+//                value = 1;
+//            }
+//
+//            JSONObject json = new JSONObject();
+//            try {
+//                json.put("type", "stiffness");
+//                json.put("part", "Body");
+//                json.put("value", value);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            networkThread.sendMessage(json);
+//            Log.d(String.valueOf(json), "setStiffness: json");
+//        } else {
+//            stiffness.setChecked(false);
+//        }
+    }
+
     public void connectRobot(View view) {
         Button connectButton = (Button) view;
-        if (networkThread == null) {
-            Log.d(String.valueOf(networkThread), "connectRobot: connect");
+        if (connectButton.getText().equals("Connect")) {
             String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
 
             // Start thread with robot connection
@@ -94,32 +120,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             // Close thread
             if (networkThread != null) {
                 networkThread.closeThread();
-                networkThread = null;
             }
             connectButton.setText("Connect");
-        }
-    }
-
-    public void setStiffness(View view) {
-        CheckBox stiffness = (CheckBox) view;
-        if (networkThread != null) {
-            int value = 0;
-            if (stiffness.isChecked()) {
-                value = 1;
-            }
-
-            JSONObject json = new JSONObject();
-            try {
-                json.put("type", "stiffness");
-                json.put("part", "Body");
-                json.put("value", value);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            networkThread.sendMessage(json);
-            Log.d(String.valueOf(json), "setStiffness: json");
-        } else {
-            stiffness.setChecked(false);
         }
     }
 
