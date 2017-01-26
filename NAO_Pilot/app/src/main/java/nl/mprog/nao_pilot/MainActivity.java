@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     public void connectRobot(View view) {
         Button connectButton = (Button) view;
-        if (connectButton.getText().equals("Connect")) {
+        if (networkThread == null) {
+            Log.d(String.valueOf(networkThread), "connectRobot: connect");
             String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
 
             // Start thread with robot connection
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             // Close thread
             if (networkThread != null) {
                 networkThread.closeThread();
+                networkThread = null;
             }
             connectButton.setText("Connect");
         }

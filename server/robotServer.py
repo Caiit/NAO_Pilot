@@ -9,7 +9,7 @@ import json
 import sys
 import atexit
 
-#NAO from naoqi import ALProxy
+from naoqi import ALProxy
 import vision_definitions
 import Image
 import base64
@@ -75,10 +75,13 @@ class networkThread (threading.Thread):
             data = self.connection.recv(self.BUFFER_SIZE)[2:]
         except IOError as e:  # and here it is handeled
             if e.errno == errno.EWOULDBLOCK:
+                # Waiting for new message
                 return
-            else:
-                self.connection = None
-        if (data == ""): return
+            print "Other problem with connection: closed"
+            self.connection = None
+        if (data == ""):
+            self.connection = None
+            return
 
         # try :
         #     message = '{"type": "received", "text": "Data received"}'
@@ -123,10 +126,10 @@ thread = networkThread()
 send = "status"
 
 # Proxies
-#NAO tts = ALProxy("ALTextToSpeech", IP, 9559)
-#NAO motionProxy = ALProxy("ALMotion", IP, 9559)
-#NAO postureProxy = ALProxy("ALRobotPosture", IP, 9559)
-#NAO camProxy = ALProxy("ALVideoDevice", IP, 9559)
+tts = ALProxy("ALTextToSpeech", IP, 9559)
+motionProxy = ALProxy("ALMotion", IP, 9559)
+postureProxy = ALProxy("ALRobotPosture", IP, 9559)
+camProxy = ALProxy("ALVideoDevice", IP, 9559)
 
 def toJson(data):
     try:
@@ -165,16 +168,22 @@ def speak(data):
 
 def walk(data):
     print data
-    if (float(data["x_speed"]) == 0 and float(data["y_speed"]) == 0):
-        motionProxy.stopMove()
-        postureProxy.goToPosture("StandInit", 0.5)
+    xSpeed = float(data["x_speed"])
+    ySpeed = float(data["y_speed"])
+    thetaSpeed = float(data["theta_speed"])
+    if (xSpeed == 0 and ySpeed == 0 and thetaSpeed == 0):
+        print "Stop walking"
+        # motionProxy.stopMove()
+        # postureProxy.goToPosture("StandInit", 0.5)
     else:
-        if motionProxy.getStiffnesses("Body") < 0.8:
-            stiffness("Body", 1.0)
-        postureProxy.goToPosture("StandInit", 0.5)
-        motionProxy.moveToward(float(data["x_speed"]), float(data["y_speed"]), 0)
+        print "Walking with: ", xSpeed, ySpeed, thetaSpeed
+        # if motionProxy.getStiffnesses("Body") < 0.8:
+        #     stiffness("Body", 1.0)
+        # postureProxy.goToPosture("StandInit", 0.5)
+        # motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
 
 
+# TODO: can be deleted if walk works
 def turn(data):
     print data
     if motionProxy.getStiffnesses("Body") < 0.8:
@@ -184,38 +193,33 @@ def turn(data):
 
 
 def takePicture():
-    global send
-    # resolution = vision_definitions.kQVGA
-    # colorSpace = vision_definitions.kRGBColorSpace
-    # fps = 20
-    #
-    # nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
-    #
-    # print 'getting images in remote'
-    # naoImage = camProxy.getImageRemote(nameId)
-    # camProxy.unsubscribe(nameId)
-    #
-    # if not naoImage: return
-    #
-    # # Get the image size and pixel array.
-    # imageWidth = naoImage[0]
-    # imageHeight = naoImage[1]
-    # array = naoImage[6]
-    #
-    # # Create a PIL Image from our pixel array.
-    # im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
-    #
-    # # Save the image.
-    # im.save("camImage.png", "PNG")
-    #
-    # with open("camImage.png", "rb") as image_file:
-    with open("robot.png", "rb") as image_file:
+    resolution = vision_definitions.kQVGA
+    colorSpace = vision_definitions.kRGBColorSpace
+    fps = 20
+
+    nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
+
+    print 'getting images in remote'
+    naoImage = camProxy.getImageRemote(nameId)
+    camProxy.unsubscribe(nameId)
+
+    if not naoImage: return
+
+    # Get the image size and pixel array.
+    imageWidth = naoImage[0]
+    imageHeight = naoImage[1]
+    array = naoImage[6]
+
+    # Create a PIL Image from our pixel array.
+    im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
+
+    # Save the image.
+    im.save("camImage.png", "PNG")
+
+    with open("camImage.png", "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
     image_file.close()
     thread.outMessages.put('{"type": "picture", "img": "' + encoded_string + '"}')
-    send = "nothing"
-
-    # thread.outMessages.put("DEBUG")
 
 
 def moves(data):
@@ -252,7 +256,8 @@ def handleMessages():
         else:
             send = "nothing"
     elif dataType == "moves":
-        moves(data)
+        # moves(data)
+        print  "dancing"
     elif dataType == "disconnect":
         print "Disconnecting"
 

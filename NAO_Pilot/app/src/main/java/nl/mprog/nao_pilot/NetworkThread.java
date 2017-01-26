@@ -65,6 +65,10 @@ public class NetworkThread implements Runnable {
         this.handler = handler;
     }
 
+    public boolean getShutdown() {
+        return shutdown;
+    }
+
     public void run() {
         createSocket();
         while (!shutdown) {
@@ -140,8 +144,14 @@ public class NetworkThread implements Runnable {
                 // Get size of messsage
                 byte[] byteSize = new byte[8];
                 in.read(byteSize);
-                int size = Integer.parseInt(new String(byteSize));
-                Log.d(String.valueOf(size), "receiveMessages: size");
+                int size;
+                try {
+                    size = Integer.parseInt(new String(byteSize));
+                } catch (NumberFormatException nfe) {
+                    Log.d("No number", "receiveMessages: Message doesn't start with a number");
+                    return;
+                }
+//                Log.d(String.valueOf(size), "receiveMessages: size");
                 // Read message
                 String message = "";
                 String error = "";
@@ -155,38 +165,18 @@ public class NetworkThread implements Runnable {
                     byte[] byteMessage = new byte[bufferSize];
                     int bytesAvailable = in.available();
                     int bytesRead = in.read(byteMessage);
-                    if (bufferSize > 0 ) {
-                        Log.d(size + ", " + bytesAvailable + ", " + bytesRead + ", " + message.length(), "receiveMessages: buffersize");
-                    }
+//                    if (bufferSize > 0 ) {
+//                        Log.d(size + ", " + bytesAvailable + ", " + bytesRead + ", " + message.length(), "receiveMessages: buffersize");
+//                    }
 
                     byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
                     message += fromBytes(validBytes);
                 }
-                Log.d(String.valueOf(message.length()), "receiveMessages: string length");
-                System.out.println("<" + message.substring(Math.max(0, size - 500)) + ">");
-                // Split message on end sign and delete rest
-//                String[] parts = message.split(" end \0");
-//                // Add message to buffer, if no end sign in message, return
-//                buffer += message;
-//                // Split message on end sign, begin is complete message, rest is new buffer
-//                final String[] parts = buffer.split("end \0");
-//                if (parts.length == 1 && !buffer.endsWith("end \0")) { return; }
-//                if (parts.length > 1) {
-//                    buffer = parts[1];
-//                } else {
-//                    buffer = "";
-//                }
+//                Log.d(String.valueOf(message.length()), "receiveMessages: string length");
+//                System.out.println("<" + message.substring(Math.max(0, size - 500)) + ">");
                 // Add message to the messages handler of the main thread
                 Message msg = Message.obtain();
                 msg.obj = message;
-//                String truth = new String( new char[50000]).replace("\0", "abcdefg");
-//                truth += "h";
-//                if (message.equals(truth)) {
-//                    System.out.println("MESSAGE CORRECT");
-//
-//                } else {
-//                    System.out.println("WRONG WRONG WRONG");
-//                }
                 handler.sendMessage(msg);
             }
         } catch (IOException e) {
