@@ -100,9 +100,6 @@ public class NetworkThread implements Runnable {
 
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
 
-            // Send message to tell connection is created
-//            out.writeUTF(toJson("connect", "Hello robot from the app.").toString());
-//
 //            // Wait until message from server available
 //            while (in.available() == 0) {
 //            }
@@ -151,24 +148,17 @@ public class NetworkThread implements Runnable {
                     Log.d("No number", "receiveMessages: Message doesn't start with a number");
                     return;
                 }
-//                Log.d(String.valueOf(size), "receiveMessages: size");
                 // Read message
                 String message = "";
-                String error = "";
                 while (in.available() < size )
                 {
                     // TODO: timer toeveogen
-//                    System.out.println("bytes avail: " + in.available());
                 }
-                while (message.length() < size - 1 ) {
+                while (message.length() < size - 1) {
                     int bufferSize = size - message.length();
 
                     byte[] byteMessage = new byte[bufferSize];
-                    int bytesAvailable = in.available();
                     int bytesRead = in.read(byteMessage);
-//                    if (bufferSize > 0 ) {
-//                        Log.d(size + ", " + bytesAvailable + ", " + bytesRead + ", " + message.length(), "receiveMessages: buffersize");
-//                    }
 
                     byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
                     message += fromBytes(validBytes);

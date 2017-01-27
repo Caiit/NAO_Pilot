@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
     <TextView
         android:layout_weight="0.1"
         android:layout_width="wrap_content"
@@ -16,7 +17,7 @@
         android:textSize="20sp"/>
 
     <EditText
-        android:text="10.42.0.139"
+        android:text="10.42.0.180"
         android:layout_weight="0.9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,11 +27,28 @@
     </LinearLayout>
 
     <Button
+        android:text="Connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:id="@+id/connectButton"
         android:onClick="connectRobot"/>
+
+
+    <TextView
+        android:layout_marginTop="20sp"
+        android:text="Name: "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:id="@+id/nameText"/>
+
+    <TextView
+        android:text="Battery: "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:id="@+id/batteryText"/>
 
     <CheckBox
         android:text="Stiffness"

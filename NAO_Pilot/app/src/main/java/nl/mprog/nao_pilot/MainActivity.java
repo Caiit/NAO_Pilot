@@ -130,6 +130,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     private void setInfo(String name, int battery, boolean stiffness) {
         TextView nameTV = (TextView) findViewById(R.id.nameText);
+        if (nameTV == null) {
+            // fragment is not loaded yet
+            return;
+        }
         nameTV.setText("Name: " + name);
         TextView batteryTV = (TextView) findViewById(R.id.batteryText);
         batteryTV.setText("Battery: " + battery);

@@ -38,7 +38,7 @@ class networkThread (threading.Thread):
                 self.connection, addr = self.serverSocket.accept()
                 self.connection.setblocking(0)
                 print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            #     # TODO: maak mooi geluidje
+                self.inMessages.put('{"type": "connect"}')
             self.receiveMessages()
             self.sendMessage()
         print "Closing server"
@@ -63,10 +63,6 @@ class networkThread (threading.Thread):
         # Start listening on socket
         self.serverSocket.listen(1)
         print 'Socket now listening'
-        # self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # self.serverSocket.setblocking(0)
-        # self.ready = select.select([self.serverSocket], [], [], 1)
 
 
     def receiveMessages(self):
@@ -81,55 +77,32 @@ class networkThread (threading.Thread):
                 return
             print "Other problem with connection: closed"
             self.connection = None
+            self.inMessages.put('{"type": "disconnect"}')
         if (not size):
             self.connection = None
+            self.inMessages.put('{"type": "disconnect"}')
             return
 
-        print size
         try:
-            data = self.connection.recv(size)
+            data = self.connection.recv(100)
             while (len(data) < size):
-                data += self.connection.recv(size - len(data))
+                msgTest = self.connection.recv(size - len(data))
+                data += msgTest
         except IOError as e:  # and here it is handeled
             if e.errno == errno.EWOULDBLOCK:
                 # Waiting for new message
                 return
             print "Other problem with connection: closed"
             self.connection = None
-
-        print "data: ", data
         self.inMessages.put(data)
-        # try :
-        #     message = '{"type": "received", "text": "Data received"}'
-        #
-        #     self.outMessages.put(message)
-        #     self.sendMessage()
-        # except socket.error:
-        #     print 'Send failed'
-
-        # Make sure message is correct json message
-        # self.buffer += data
-        # if ('}' not in self.buffer): return
-        # begin, end, self.buffer = self.buffer.partition('}')
-        # message = begin + end
-        # self.inMessages.put(message)
 
 
     def sendMessage(self):
         if (self.connection and not self.outMessages.empty()):
             message = self.outMessages.get_nowait().encode("UTF-8") + chr(0)
-            # message = 50000 * "abcdefg" + "h" + chr(0)
             size = len(message)
             sendString = str(size).zfill(8) + message
-            # print "0's in message: ", message.count(chr(0))
-            # print "bytes: ", str(size).zfill(8)
             self.connection.send(sendString)
-        # if (not self.outMessages.empty()):
-        #     try:
-        #         self.serverSocket.send(self.outMessages.get_nowait())
-        #     except socket.error:
-        #         # no connection yet
-        #         return
 
 
 IP = "localhost"
@@ -139,7 +112,6 @@ MAX_CLIENTS = 5
 BUFFER_SIZE = 1024
 
 thread = networkThread()
-send = "status"
 
 # Proxies
 tts = ALProxy("ALTextToSpeech", IP, 9559)
@@ -154,10 +126,11 @@ def toJson(data):
         return json.loads(data)
     except:
         print "No valid json"
-        return {"type": "error"}
+        return {"type": "error", "text": "No valid json"}
 
 
 def onExit():
+    motionProxy.rest()
     # closeConnection(s)
     print "Exiting"
     if thread:
@@ -179,11 +152,9 @@ def stiffness(part, value):
 def getInfo():
     name = systemProxy.robotName()
     battery = batteryProxy.getBatteryCharge()
-    print  motionProxy.getStiffnesses("Body")
     stiffness = "false"
     if all(i > 0.5 for i in motionProxy.getStiffnesses("Body")):
         stiffness = "true"
-    print name, battery, stiffness
     thread.outMessages.put('{"type": "info", "name": "' + name +
                            '", "battery": "' + str(battery) + '", "stiffness": "'
                             + stiffness + '"}')
@@ -198,7 +169,6 @@ def speak(data):
 
 
 def walk(data):
-    print data
     xSpeed = float(data["x_speed"])
     ySpeed = float(data["y_speed"])
     thetaSpeed = float(data["theta_speed"])
@@ -255,7 +225,6 @@ def moves(data):
 
 
 def handleMessages():
-    global send
     if thread.inMessages.empty():
         return
 
@@ -263,7 +232,8 @@ def handleMessages():
 
     dataType = data["type"]
     if dataType == "connect":
-        print "Connecting: ", data["text"]
+        tts.say("Oh")
+        # TODO geluidje toevoegen
     elif dataType == "stiffness":
         stiffness(str(data["part"]), float(data["value"]))
     elif dataType == "info":
@@ -277,12 +247,9 @@ def handleMessages():
     elif dataType == "moves":
         moves(data)
     elif dataType == "disconnect":
-        print "Disconnecting"
-
-
-# def sendMessage():
-#     if send == "picture":
-#         takePicture()
+        tts.setParameter("pitchShift", 2.0)
+        tts.say("ByeBye")
+        # TODO mooi geluidje toevoegen
 
 
 def main():
@@ -291,7 +258,6 @@ def main():
     thread.start()
     while (True):
         handleMessages()
-        # sendMessage()
 
 
 if __name__ == "__main__":

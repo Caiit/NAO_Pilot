@@ -98,6 +98,7 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
                     is.close();
                     // Convert the buffer into a string.
                     String file = new String(byteFile);
+                    Log.d(file, "onClick: file");
                     json.put("file", file);
                 }
                 networkThread.sendMessage(json);
