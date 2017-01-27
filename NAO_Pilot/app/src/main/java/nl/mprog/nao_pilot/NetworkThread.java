@@ -173,8 +173,6 @@ public class NetworkThread implements Runnable {
                     byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
                     message += fromBytes(validBytes);
                 }
-//                Log.d(String.valueOf(message.length()), "receiveMessages: string length");
-//                System.out.println("<" + message.substring(Math.max(0, size - 500)) + ">");
                 // Add message to the messages handler of the main thread
                 Message msg = Message.obtain();
                 msg.obj = message;

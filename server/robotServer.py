@@ -90,8 +90,12 @@ class networkThread (threading.Thread):
             data = self.connection.recv(size)
             while (len(data) < size):
                 data += self.connection.recv(size - len(data))
-        except Exception as e:
-            raise
+        except IOError as e:  # and here it is handeled
+            if e.errno == errno.EWOULDBLOCK:
+                # Waiting for new message
+                return
+            print "Other problem with connection: closed"
+            self.connection = None
 
         print "data: ", data
         self.inMessages.put(data)
@@ -142,6 +146,8 @@ tts = ALProxy("ALTextToSpeech", IP, 9559)
 motionProxy = ALProxy("ALMotion", IP, 9559)
 postureProxy = ALProxy("ALRobotPosture", IP, 9559)
 camProxy = ALProxy("ALVideoDevice", IP, 9559)
+batteryProxy = ALProxy("ALBattery", IP, 9559)
+systemProxy = ALProxy("ALSystem", IP, 9559)
 
 def toJson(data):
     try:
@@ -170,6 +176,19 @@ def stiffness(part, value):
     motionProxy.setStiffnesses(part, value)
 
 
+def getInfo():
+    name = systemProxy.robotName()
+    battery = batteryProxy.getBatteryCharge()
+    print  motionProxy.getStiffnesses("Body")
+    stiffness = "false"
+    if all(i > 0.5 for i in motionProxy.getStiffnesses("Body")):
+        stiffness = "true"
+    print name, battery, stiffness
+    thread.outMessages.put('{"type": "info", "name": "' + name +
+                           '", "battery": "' + str(battery) + '", "stiffness": "'
+                            + stiffness + '"}')
+
+
 def speak(data):
     tts.setVolume(float(data["volume"])/100)
     pitch = float(data["pitch"]) / 100
@@ -187,19 +206,8 @@ def walk(data):
         motionProxy.stopMove()
         postureProxy.goToPosture("StandInit", 0.5)
     else:
-        if motionProxy.getStiffnesses("Body") < 0.8:
-            stiffness("Body", 1.0)
         postureProxy.goToPosture("StandInit", 0.5)
         motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
-
-
-# TODO: can be deleted if walk works
-def turn(data):
-    print data
-    if motionProxy.getStiffnesses("Body") < 0.8:
-        stiffness("Body", 1.0)
-    postureProxy.goToPosture("StandInit", 0.5)
-    motionProxy.moveToward(0, 0, float(data["speed"]))
 
 
 def takePicture():
@@ -209,7 +217,6 @@ def takePicture():
 
     nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
 
-    print 'getting images in remote'
     naoImage = camProxy.getImageRemote(nameId)
     camProxy.unsubscribe(nameId)
 
@@ -234,11 +241,17 @@ def takePicture():
 
 def moves(data):
     code = data["file"]
-    try:
-        exec(code)
-        motionProxy.angleInterpolationBezier(names, times, keys)
-    except:
-        thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"}')
+    if code == "stand":
+        postureProxy.goToPosture("StandInit", 0.5)
+    elif code == "sit":
+        motionProxy.rest()
+    else:
+        try:
+            exec(code)
+            motionProxy.angleInterpolationBezier(names, times, keys)
+            postureProxy.goToPosture("StandInit", 0.5)
+        except:
+            thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"}')
 
 
 def handleMessages():
@@ -253,26 +266,23 @@ def handleMessages():
         print "Connecting: ", data["text"]
     elif dataType == "stiffness":
         stiffness(str(data["part"]), float(data["value"]))
+    elif dataType == "info":
+        getInfo()
     elif dataType == "speak":
         speak(data)
     elif dataType == "walk":
         walk(data)
-    elif dataType == "turn":
-        turn(data)
     elif dataType == "picture":
-        if data["get"] == "true":
-            send = "picture"
-        else:
-            send = "nothing"
+        takePicture()
     elif dataType == "moves":
         moves(data)
     elif dataType == "disconnect":
         print "Disconnecting"
 
 
-def sendMessage():
-    if send == "picture":
-        takePicture()
+# def sendMessage():
+#     if send == "picture":
+#         takePicture()
 
 
 def main():
@@ -281,7 +291,7 @@ def main():
     thread.start()
     while (True):
         handleMessages()
-        sendMessage()
+        # sendMessage()
 
 
 if __name__ == "__main__":

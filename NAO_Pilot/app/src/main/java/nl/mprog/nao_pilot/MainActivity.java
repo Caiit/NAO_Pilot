@@ -43,16 +43,21 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                Log.d(String.valueOf(((String)msg.obj).length()), "handleMessage: msg");
-                // TODO: make switch
                 JSONObject message;
                 try {
                     message = new JSONObject( (String)msg.obj);
-                    if (message.getString("type").equals("picture")) {
-                        setImage(message.getString("img"));
-                    }
-                    else {
-                        Log.d(String.valueOf(message), "handleMessage: no image");
+                    switch (message.getString("type")) {
+                        case "picture":
+                            setImage(message.getString("img"));
+                            break;
+                        case "info":
+                            String name = message.getString("name");
+                            int battery = Integer.parseInt(message.getString("battery"));
+                            Log.d(message.getString("stiffness"), "handleMessage: ");
+                            boolean stiffness = Boolean.parseBoolean(message.getString("stiffness"));
+                            setInfo(name, battery, stiffness);
+                            break;
+                        default:
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -77,32 +82,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         tabLayout.getTabAt(4).setIcon(R.drawable.moves);
     }
 
-    public Handler getHandler() {
-        return handler;
-    }
-
-    public void setStiffness(View view) {
-//        CheckBox stiffness = (CheckBox) view;
-//        if (networkThread != null) {
-//            int value = 0;
-//            if (stiffness.isChecked()) {
-//                value = 1;
-//            }
-//
-//            JSONObject json = new JSONObject();
-//            try {
-//                json.put("type", "stiffness");
-//                json.put("part", "Body");
-//                json.put("value", value);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//            networkThread.sendMessage(json);
-//            Log.d(String.valueOf(json), "setStiffness: json");
-//        } else {
-//            stiffness.setChecked(false);
-//        }
-    }
 
     public void connectRobot(View view) {
         Button connectButton = (Button) view;
@@ -149,8 +128,18 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }
     }
 
+    private void setInfo(String name, int battery, boolean stiffness) {
+        TextView nameTV = (TextView) findViewById(R.id.nameText);
+        nameTV.setText("Name: " + name);
+        TextView batteryTV = (TextView) findViewById(R.id.batteryText);
+        batteryTV.setText("Battery: " + battery);
+        CheckBox stiffBox = (CheckBox) findViewById(R.id.stiffBox);
+        Log.d(String.valueOf(stiffness), "setInfo: stiff");
+        stiffBox.setChecked(stiffness);
+    }
+
     private void setImage(String image) {
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         try {
             byte[] encodeByte = Base64.decode(image, Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);

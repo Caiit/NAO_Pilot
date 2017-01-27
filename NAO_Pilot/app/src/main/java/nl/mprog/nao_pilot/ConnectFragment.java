@@ -41,7 +41,6 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
 
         setConnectButton();
         // Set listeners
-//        view.findViewById(R.id.connectButton).setOnClickListener(this);
         view.findViewById(R.id.stiffBox).setOnClickListener(this);
         return view;
     }
@@ -62,14 +61,6 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
             JSONObject json = new JSONObject();
             try {
                 json.put("type", "info");
-                if (isVisibleToUser) {
-                    Log.d("start info", "setUserVisibleHint: visible");
-                    // TODO: add settings
-                    json.put("get", "true");
-                } else {
-                    Log.d("stop info", "setUserVisibleHint: not visible");
-                    json.put("get", "false");
-                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -80,26 +71,6 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.connectButton:
-//                if (networkThread == null) {
-//                    String IP = ((EditText) view.findViewById(R.id.IP)).getText().toString();
-//
-//                    // Start thread with robot connection
-//                    networkThread = NetworkThread.getInstance();
-//                    networkThread.setIP(IP);
-//                    networkThread.setHandler(handler);
-//                    new Thread(networkThread).start();
-//                    ((TextView)v).setText("Disconnect");
-//                } else {
-//                    Log.d(String.valueOf(networkThread), "connectRobot: closing thread");
-//                    // Close thread
-//                    if (networkThread != null) {
-//                        networkThread.closeThread();
-//                        networkThread = null;
-//                    }
-//                    ((TextView)v).setText("Connect");
-//                }
-//                break;
             case R.id.stiffBox:
                 CheckBox stiffness = (CheckBox) v;
                 if (networkThread == null) {
