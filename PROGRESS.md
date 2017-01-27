@@ -75,3 +75,4 @@ TODOs:
 - send audio with dances
 - find nice connect and disconnect sound
 - add app logo 
+- save picture
