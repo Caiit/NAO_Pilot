@@ -51,52 +51,35 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
 //        handleButtons();
 
         // Set button listeners
+        view.findViewById(R.id.standButton).setOnClickListener(this);
+        view.findViewById(R.id.sitButton).setOnClickListener(this);
         view.findViewById(R.id.waveButton).setOnClickListener(this);
         view.findViewById(R.id.guitarButton).setOnClickListener(this);
+        view.findViewById(R.id.robotButton).setOnClickListener(this);
 
         return view;
     }
 
-//    private void handleButtons() {
-//        ImageButton waveButton = (ImageButton) view.findViewById(R.id.waveButton);
-//        waveButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (networkThread != null) {
-//                     JSONObject json = new JSONObject();
-//                    try {
-//                        InputStream is = getContext().getAssets().open("wave.txt");
-//                        int size = is.available();
-//                        byte[] byteFile = new byte[size];
-//                        is.read(byteFile);
-//                        is.close();
-//                        // Convert the buffer into a string.
-//                        String file = new String(byteFile);
-//                        json.put("type", "moves");
-//                        json.put("file", file);
-//                        System.out.println(file.length());
-//                        networkThread.sendMessage(json);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-//    }
 
     @Override
     public void onClick(View view) {
         String fileName = "";
         switch (view.getId()) {
             // TODO: logische knopjes maken en function toevoegen
+            case R.id.standButton:
+                fileName = "stand";
+                break;
+            case R.id.sitButton:
+                fileName = "sit";
+                break;
             case R.id.waveButton:
                 fileName = "wave.txt";
                 break;
             case R.id.guitarButton:
                 fileName = "guitar.txt";
                 break;
+            case R.id.robotButton:
+                fileName = "robot.txt";
             default:
                 break;
         }
@@ -104,16 +87,19 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
         if (networkThread != null && !fileName.equals("")) {
             JSONObject json = new JSONObject();
             try {
-                InputStream is = getContext().getAssets().open(fileName);
-                int size = is.available();
-                byte[] byteFile = new byte[size];
-                is.read(byteFile);
-                is.close();
-                // Convert the buffer into a string.
-                String file = new String(byteFile);
                 json.put("type", "moves");
-                json.put("file", file);
-                System.out.println(file.length());
+                if (fileName.equals("sit") || fileName.equals("stand")) {
+                    json.put("file", fileName);
+                } else {
+                    InputStream is = getContext().getAssets().open(fileName);
+                    int size = is.available();
+                    byte[] byteFile = new byte[size];
+                    is.read(byteFile);
+                    is.close();
+                    // Convert the buffer into a string.
+                    String file = new String(byteFile);
+                    json.put("file", file);
+                }
                 networkThread.sendMessage(json);
             } catch (IOException e) {
                 e.printStackTrace();
