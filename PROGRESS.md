@@ -52,3 +52,17 @@ The special moves via files is fixed. The app reads in a file, stored in the ass
 
 # day 12
 To get more "real time" (it is still with a delay) images instead of clicking a button to get an image, the app now sends a message to obtain images when the user switches to the camera tab and sends a message to stop when switching to another tab. The robot sends camera images every cycle. Images are often still not correctly send (data is missing). To avoid this, I want to send the size of a message in front of the message string, so the receiver knows how much to read. 
+
+# day 13
+After many attempts, sending the size of the message in front of the message works. Now the structure is as follow:
+
+
+00000055{type: info, (name: nao, battery: 50, stiffness: true)}: get the robot name, battery and stiffness status </br>
+00000041{type: stiffness, part: Body, value: 1.0}: turn the robot's stiffness on (1.0) or off (0.0) </br>
+00000069{type: speak, text: hello robot, volume: 100, speed: 100, pitch: 100}: let the robot say the text with different parameters </br>
+00000056{type: walk, x_speed: 100, y_speed: 100, theta_speed: 0}: let the robot walk with the given speed </br>
+00000037{type: picture, (img: img_in_string)}: take a picture with the robots camera </br>
+00000043{type: moves, file: file_content_in_string}: let the robot perform a specific move </br>
+
+# day 14
+Cleaned the code. Most functions of a specific part are now in their own fragment instead of in the main activity. Only connecting with the robot and handling the messages from the robot are still in the main activity, because the handler is part of the main activity.
