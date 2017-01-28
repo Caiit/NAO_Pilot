@@ -74,5 +74,5 @@ TODOs:
 - fix connect button: oncreate the connect button says disconnect while there is no connection
 - send audio with dances
 - find nice connect and disconnect sound
-- add app logo 
-- save picture
+- ~~add app logo ~~
+- ~~save picture~~
