@@ -53,6 +53,10 @@ public class NetworkThread implements Runnable {
     private NetworkThread() {
     }
 
+    public boolean connected() {
+        return IP != null;
+    }
+
     public void setIP(String IP) {
         this.IP = IP;
     }
@@ -85,6 +89,7 @@ public class NetworkThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        IP = null;
         thread = null;
     }
 

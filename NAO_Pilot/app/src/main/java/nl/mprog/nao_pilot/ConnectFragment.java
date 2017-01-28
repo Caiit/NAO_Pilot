@@ -46,7 +46,7 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setConnectButton() {
-        if (networkThread != null) {
+        if (networkThread.connected()) {
             ((TextView) view.findViewById(R.id.connectButton)).setText("Disconnect");
         } else {
             ((TextView) view.findViewById(R.id.connectButton)).setText("Connect");
@@ -56,8 +56,8 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-
-        if (networkThread != null) {
+        setConnectButton();
+        if (networkThread.connected()) {
             JSONObject json = new JSONObject();
             try {
                 json.put("type", "info");
