@@ -66,3 +66,13 @@ After many attempts, sending the size of the message in front of the message wor
 
 # day 14
 Cleaned the code. Most functions of a specific part are now in their own fragment instead of in the main activity. Only connecting with the robot and handling the messages from the robot are still in the main activity, because the handler is part of the main activity.
+
+# day 15
+Cleaned the code again. During the presentation the camera didn't work. Instead of video, the user can now only take a picture to reduce the amount of data send. This works fine. New moves are added. 
+
+TODOs:
+- fix connect button: oncreate the connect button says disconnect while there is no connection
+- send audio with dances
+- find nice connect and disconnect sound
+- add app logo 
+- save picture
