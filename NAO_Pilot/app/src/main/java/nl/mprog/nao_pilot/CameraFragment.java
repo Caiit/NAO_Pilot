@@ -1,11 +1,16 @@
 package nl.mprog.nao_pilot;
 
+import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,8 +45,8 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
+    public void onClick(View v) {
+        switch (v.getId()) {
             // TODO: logische knopjes maken en function toevoegen
             case R.id.takePictureButton:
                 if (networkThread != null) {
@@ -56,7 +61,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
             case R.id.savePictureButton:
-                Log.d("Save", "onClick: save picture");
+                ImageView imgView = (ImageView) view.findViewById(R.id.cameraView);
+                Bitmap img = ((BitmapDrawable) imgView.getDrawable()).getBitmap();
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+                MediaStore.Images.Media.insertImage(view.getContext().getContentResolver(), img, "robot" , "from app");
                 break;
             default:
         }

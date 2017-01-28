@@ -3,8 +3,7 @@
     package="nl.mprog.nao_pilot">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-feature android:name="com.softbank.hardware.pepper" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
