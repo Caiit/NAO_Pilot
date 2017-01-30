@@ -71,16 +71,21 @@ class networkThread (threading.Thread):
             msg = self.connection.recv(10)[2:]
             if (not msg == ""):
                 size = int(msg)
-        except IOError as e:  # and here it is handeled
+        except IOError as e:
             if e.errno == errno.EWOULDBLOCK:
                 # Waiting for new message
                 return
-            print "Other problem with connection: closed"
+            print "Other problem with connection: Disconnected"
             self.connection = None
             self.inMessages.put('{"type": "disconnect"}')
+        except ValueError:
+            print "No valid size"
+            self.inMessages.put('{"type": "error", "text": "could not read message"}')
+            return
         if (not size):
             self.connection = None
             self.inMessages.put('{"type": "disconnect"}')
+            print "Disconnected"
             return
 
         try:
@@ -131,16 +136,9 @@ def toJson(data):
 
 def onExit():
     motionProxy.rest()
-    # closeConnection(s)
     print "Exiting"
     if thread:
         thread.shutdown = True
-
-
-def closeConnection(s):
-    print("Closing connection")
-    motionProxy.rest()
-    s.close()
 
 
 def stiffness(part, value):
@@ -247,8 +245,8 @@ def handleMessages():
     elif dataType == "moves":
         moves(data)
     elif dataType == "disconnect":
-        tts.setParameter("pitchShift", 2.0)
         tts.say("ByeBye")
+        motionProxy.rest()
         # TODO mooi geluidje toevoegen
 
 
