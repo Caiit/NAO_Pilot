@@ -1,11 +1,13 @@
 package nl.mprog.nao_pilot;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -48,7 +50,8 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
     @Override
     public void onClick(View v) {
         if (networkThread != null) {
-            String message = ((EditText) view.findViewById(R.id.sayText)).getText().toString();
+            EditText messageET = (EditText) view.findViewById(R.id.sayText);
+            String message = messageET.getText().toString();
 
             JSONObject json = new JSONObject();
             try {
@@ -61,6 +64,9 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
                 e.printStackTrace();
             }
             networkThread.sendMessage(json);
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(messageET.getWindowToken(), 0);
         }
     }
 

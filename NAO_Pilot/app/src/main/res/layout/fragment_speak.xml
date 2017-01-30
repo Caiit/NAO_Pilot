@@ -25,12 +25,12 @@
 
 
     <Button
+        android:layout_margin="50dp"
         android:text="Say"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:id="@+id/sayButton"
-        android:onClick="sayText"/>
+        android:id="@+id/sayButton"/>
 
 
     <!--Volume 0 - 100 -->
