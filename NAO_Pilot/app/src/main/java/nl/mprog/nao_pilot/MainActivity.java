@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +28,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private NetworkThread networkThread;
     private Handler handler;
     private ViewPager viewPager;
+    private String name = "";
+    private int battery = 0;
+    private boolean stiffness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,30 +45,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         addTabs();
 
         // Create handler
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                JSONObject message;
-                try {
-                    message = new JSONObject( (String)msg.obj);
-                    switch (message.getString("type")) {
-                        case "picture":
-                            setImage(message.getString("img"));
-                            break;
-                        case "info":
-                            String name = message.getString("name");
-                            int battery = Integer.parseInt(message.getString("battery"));
-                            Log.d(message.getString("stiffness"), "handleMessage: ");
-                            boolean stiffness = Boolean.parseBoolean(message.getString("stiffness"));
-                            setInfo(name, battery, stiffness);
-                            break;
-                        default:
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+        setHandler();
     }
 
     private void addTabs() {
@@ -82,7 +64,38 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         tabLayout.getTabAt(4).setIcon(R.drawable.moves);
     }
 
+    private void setHandler() {
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                JSONObject message;
+                try {
+                    message = new JSONObject((String)msg.obj);
+                    switch (message.getString("type")) {
+                        case "picture":
+                            setImage(message.getString("img"));
+                            break;
+                        case "info":
+                            name = message.getString("name");
+                            battery = Integer.parseInt(message.getString("battery"));
+                            Log.d(message.getString("stiffness"), "handleMessage: ");
+                            stiffness = Boolean.parseBoolean(message.getString("stiffness"));
+                            showInfo();
+                            break;
+                        default:
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
 
+
+    /**
+     * Onclick from the connect button
+     * @param view
+     */
     public void connectRobot(View view) {
         Button connectButton = (Button) view;
         if (connectButton.getText().equals("Connect")) {
@@ -93,6 +106,15 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             networkThread.setIP(IP);
             networkThread.setHandler(handler);
             new Thread(networkThread).start();
+
+            // Get info from the robot
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "info");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            networkThread.sendMessage(json);
             connectButton.setText("Disconnect");
         } else {
             Log.d(String.valueOf(networkThread), "connectRobot: closing thread");
@@ -100,38 +122,18 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             if (networkThread != null) {
                 networkThread.closeThread();
             }
+            name = "";
+            battery = 0;
+            stiffness = false;
+            showInfo();
             connectButton.setText("Connect");
         }
     }
-
-    public void sayText(View view) {
-        if (networkThread != null) {
-            String message = ((EditText) findViewById(R.id.sayText)).getText().toString();
-            String volumeText = (String) ((TextView) findViewById(R.id.volumeText)).getText();
-            String volume = volumeText.split("\\s+")[1];
-            String speedText = (String) ((TextView) findViewById(R.id.speedText)).getText();
-            String speed = speedText.split("\\s+")[1];
-            String pitchText = (String) ((TextView) findViewById(R.id.pitchText)).getText();
-            String pitch = pitchText.split("\\s+")[1];
-
-            JSONObject json = new JSONObject();
-            try {
-                json.put("type", "speak");
-                json.put("text", message);
-                json.put("volume", volume);
-                json.put("speed", speed);
-                json.put("pitch", pitch);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            networkThread.sendMessage(json);
-        }
-    }
-
-    private void setInfo(String name, int battery, boolean stiffness) {
+    
+    public void showInfo() {
         TextView nameTV = (TextView) findViewById(R.id.nameText);
         if (nameTV == null) {
-            // fragment is not loaded yet
+            // Fragment is not loaded yet
             return;
         }
         nameTV.setText("Name: " + name);

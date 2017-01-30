@@ -1,12 +1,8 @@
 package nl.mprog.nao_pilot;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,8 +12,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -34,16 +28,12 @@ public class NetworkThread implements Runnable {
 
     private static NetworkThread thread = new NetworkThread();
     private String IP;
-    private View view;
     private Handler handler;
     private Socket client;
     private boolean shutdown = false;
     private DataInputStream in;
     private DataOutputStream out;
-    private String buffer;
     private Queue outMessages = new LinkedList();
-    private Queue inMessages = new LinkedList();
-    private Queue images = new LinkedList();
 
     public static NetworkThread getInstance() {
         if (thread == null) thread = new NetworkThread();
@@ -61,16 +51,8 @@ public class NetworkThread implements Runnable {
         this.IP = IP;
     }
 
-    public void setView(View view) {
-        this.view = view;
-    }
-
     public void setHandler(Handler handler) {
         this.handler = handler;
-    }
-
-    public boolean getShutdown() {
-        return shutdown;
     }
 
     public void run() {
@@ -120,8 +102,7 @@ public class NetworkThread implements Runnable {
     }
 
     private String fromBytes( byte[] bytes) {
-        for (int i = bytes.length-1; i > 0 ; --i)
-        {
+        for (int i = bytes.length - 1; i > 0; i--) {
             if (bytes[i] == 0) {
                 return new String(bytes, 0, i);
             }
@@ -155,8 +136,7 @@ public class NetworkThread implements Runnable {
                 }
                 // Read message
                 String message = "";
-                while (in.available() < size )
-                {
+                while (in.available() < size ) {
                     // TODO: timer toeveogen
                 }
                 while (message.length() < size - 1) {
@@ -169,6 +149,7 @@ public class NetworkThread implements Runnable {
                     message += fromBytes(validBytes);
                 }
                 // Add message to the messages handler of the main thread
+                Log.d(message, "receiveMessages: message");
                 Message msg = Message.obtain();
                 msg.obj = message;
                 handler.sendMessage(msg);

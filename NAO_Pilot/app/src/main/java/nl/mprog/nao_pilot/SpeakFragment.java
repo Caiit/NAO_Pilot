@@ -6,8 +6,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * NAO Pilot
@@ -18,64 +22,78 @@ import android.widget.TextView;
  * Let the robot say the appropriate text.
  */
 
-public class SpeakFragment extends Fragment {
+public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-    View view;
+    private View view;
+    private NetworkThread networkThread;
+    private int volume = 100;
+    private int speed = 100;
+    private int pitch = 100;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_speak, container, false);
-        handleSeekbars();
+        networkThread = NetworkThread.getInstance();
         Log.d("SPEAK FRAGMENT", "onCreateView: ON CREATE VIEW");
+
+        // Set listeners
+        ((SeekBar) view.findViewById(R.id.seekBarVolume)).setOnSeekBarChangeListener(this);
+        ((SeekBar) view.findViewById(R.id.seekBarSpeed)).setOnSeekBarChangeListener(this);
+        ((SeekBar) view.findViewById(R.id.seekBarPitch)).setOnSeekBarChangeListener(this);
+        view.findViewById(R.id.sayButton).setOnClickListener(this);
         return view;
     }
 
-    private void handleSeekbars() {
-        SeekBar volumeBar = (SeekBar) view.findViewById(R.id.seekBarVolume);
-        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+    @Override
+    public void onClick(View v) {
+        if (networkThread != null) {
+            String message = ((EditText) view.findViewById(R.id.sayText)).getText().toString();
 
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                TextView volumeText = (TextView) getActivity().findViewById(R.id.volumeText);
-                volumeText.setText("Volume: " + String.valueOf(progress) + " %");
+            JSONObject json = new JSONObject();
+            try {
+                json.put("type", "speak");
+                json.put("text", message);
+                json.put("volume", volume);
+                json.put("speed", speed);
+                json.put("pitch", pitch);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        SeekBar speedBar = (SeekBar) view.findViewById(R.id.seekBarSpeed);
-        speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                TextView speedText = (TextView) getActivity().findViewById(R.id.speedText);
-                speedText.setText("Speed: " + String.valueOf(progress + 50) + " %");
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        SeekBar pitchBar = (SeekBar) view.findViewById(R.id.seekBarPitch);
-        pitchBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                TextView pitchText = (TextView) getActivity().findViewById(R.id.pitchText);
-                pitchText.setText("Pitch: " + String.valueOf(progress + 50) + " %");
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
+            networkThread.sendMessage(json);
+        }
     }
 
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        switch (seekBar.getId()) {
+            case R.id.seekBarVolume:
+                TextView volumeText = (TextView) getActivity().findViewById(R.id.volumeText);
+                volumeText.setText("Volume: " + String.valueOf(i) + " %");
+                volume = i;
+                break;
+            case R.id.seekBarSpeed:
+                TextView speedText = (TextView) getActivity().findViewById(R.id.speedText);
+                speedText.setText("Speed: " + String.valueOf(i + 50) + " %");
+                speed = i;
+                break;
+            case R.id.seekBarPitch:
+                TextView pitchText = (TextView) getActivity().findViewById(R.id.pitchText);
+                pitchText.setText("Pitch: " + String.valueOf(i + 50) + " %");
+                pitch = i;
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
 }

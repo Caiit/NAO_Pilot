@@ -33,9 +33,6 @@ public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_walk, container, false);
         networkThread = NetworkThread.getInstance();
-//        handleSeekbars();
-//        handleButtons();
-
 
         // Set listeners
         ((SeekBar) view.findViewById(R.id.seekBarSpeedWalk)).setOnSeekBarChangeListener(this);

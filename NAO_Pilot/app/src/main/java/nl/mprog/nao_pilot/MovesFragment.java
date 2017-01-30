@@ -47,8 +47,6 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_moves, container, false);
         networkThread = NetworkThread.getInstance();
-        networkThread.setView(view);
-//        handleButtons();
 
         // Set button listeners
         view.findViewById(R.id.standButton).setOnClickListener(this);

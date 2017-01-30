@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:id="@+id/connectButton"
+        android:id="@+id/sayButton"
         android:onClick="sayText"/>
 
 
@@ -80,8 +80,5 @@
         android:max="150"
         android:progress="50"
         android:id="@+id/seekBarPitch"/>
-
-    <!--Language TODO: check met getAvailableLanguages() -->
-
 
 </LinearLayout>

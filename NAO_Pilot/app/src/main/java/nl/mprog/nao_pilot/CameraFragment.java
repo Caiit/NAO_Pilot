@@ -34,7 +34,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_camera, container, false);
         networkThread = NetworkThread.getInstance();
-        networkThread.setView(view);
 
         Log.d("CREATE CAMERA FRAGEMNT", "onCreateView: ");
 
