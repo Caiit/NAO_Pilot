@@ -64,6 +64,7 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
                 e.printStackTrace();
             }
             networkThread.sendMessage(json);
+            // Hide keyboard after click
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(messageET.getWindowToken(), 0);
