@@ -1,44 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-
-    <Button
-        android:text="Stand"
+    <TableLayout
+        android:id="@+id/movesTableLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/standButton" />
+        android:layout_height="fill_parent"
+        android:gravity="center">
 
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center">
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Stand"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:id="@+id/standButton"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null"/>
+            </android.support.percent.PercentRelativeLayout>
 
-    <Button
-        android:text="Sit"
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Sit"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:id="@+id/sitButton"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null" />
+            </android.support.percent.PercentRelativeLayout>
+        </TableRow>
+        <TableRow
+        android:id="@+id/tableRow2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/sitButton" />
+        android:layout_height="fill_parent"
+        android:gravity="center">
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Wave"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null"
+                    android:id="@+id/waveButton" />
+            </android.support.percent.PercentRelativeLayout>
 
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Guitar"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null"
+                    android:id="@+id/guitarButton" />
+            </android.support.percent.PercentRelativeLayout>
+        </TableRow>
 
-    <Button
-        android:text="Wave"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/waveButton" />
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center" >
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Robot"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null"
+                    android:id="@+id/robotButton" />
+            </android.support.percent.PercentRelativeLayout>
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:text="Kick"
+                    android:textSize="25sp"
+                    android:shadowColor="@color/colorPrimaryDark"
+                    android:shadowRadius="5"
+                    android:textColor="@color/colorBackground"
+                    android:backgroundTint="@color/colorPrimary"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@null"
+                    android:id="@+id/kickButton" />
+            </android.support.percent.PercentRelativeLayout>
+        </TableRow>
+    </TableLayout>
 
-    <Button
-        android:text="Guitar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/guitarButton" />
-
-    <Button
-        android:text="Robot"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/robotButton" />
-</LinearLayout>
+</ScrollView>

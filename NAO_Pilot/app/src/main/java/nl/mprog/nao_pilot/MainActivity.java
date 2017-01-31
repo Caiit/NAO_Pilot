@@ -1,6 +1,5 @@
 package nl.mprog.nao_pilot;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.nsd.NsdManager;
@@ -14,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -72,9 +70,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         Button connectButton = (Button) view;
         LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
         if (networkThread == null || !networkThread.connected()) {
-//            String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
-            String IP = "1030";
-            // Start thread with robot connection
+            String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
+//            String IP = "1030";
+//             Start thread with robot connection
             networkThread = NetworkThread.getInstance();
             networkThread.setIP(IP);
             networkThread.setHandler(handler);
