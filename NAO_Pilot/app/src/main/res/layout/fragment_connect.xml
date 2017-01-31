@@ -5,30 +5,34 @@
     android:orientation="vertical"
     android:id="@+id/connectFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
     <TextView
-        android:layout_weight="0.1"
+        android:layout_margin="20dp"
+        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Robot IP"
+        android:text="Select your robot"
         android:textSize="20sp"/>
 
+    <Spinner
+        android:id="@+id/robotsDropdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown" />
+
+    <!--TODO: weghalen-->
     <EditText
         android:text="10.42.0.180"
-        android:layout_weight="0.9"
+        android:padding="10dp"
+        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="numberSigned"
         android:digits="0123456789."
         android:id="@+id/IP" />
-    </LinearLayout>
 
     <Button
-        android:layout_margin="50dp"
+        android:layout_margin="20dp"
         android:text="Connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

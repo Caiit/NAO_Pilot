@@ -6,11 +6,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * NAO Pilot
@@ -32,15 +36,27 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_connect, container, false);
         networkThread = NetworkThread.getInstance();
+        mainActivity = (MainActivity) getActivity();
         Log.d("CONNECT FRAGMENT", "onCreateView: ON CREATE VIEW");
         // Handle the connectbutton and info
         setConnectButton();
-        mainActivity = (MainActivity) getActivity();
-        mainActivity.showInfo();
+
+        // Set dropdown
+        setRobotsDropdown();
         // Set listeners
         view.findViewById(R.id.stiffBox).setOnClickListener(this);
         return view;
     }
+
+
+    private void setRobotsDropdown() {
+        Spinner dropdown = (Spinner) view.findViewById(R.id.robotsDropdown);
+        ArrayList<String> robotsArrayList = mainActivity.getRobots();
+        String[] robots = robotsArrayList.toArray(new String[robotsArrayList.size()]);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, robots);
+        dropdown.setAdapter(adapter);
+    }
+
 
     private void setConnectButton() {
         if (networkThread != null && networkThread.connected()) {

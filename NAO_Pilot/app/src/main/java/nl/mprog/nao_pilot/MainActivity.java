@@ -1,7 +1,9 @@
 package nl.mprog.nao_pilot;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.nsd.NsdManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TabLayout;
@@ -12,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -22,11 +25,14 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
     private NetworkThread networkThread;
     private Handler handler;
     private ViewPager viewPager;
+    private RobotDiscoveryListener robotDiscovery;
     private String name = "";
     private int battery = 0;
     private boolean stiffness;
@@ -45,6 +51,15 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         // Create handler
         setHandler();
+
+        // Get robots on network
+        NsdManager nsdManager = (NsdManager) getSystemService(NSD_SERVICE);
+        robotDiscovery = new RobotDiscoveryListener(nsdManager);
+        nsdManager.discoverServices("_naoqi._tcp.", NsdManager.PROTOCOL_DNS_SD, robotDiscovery);
+    }
+
+    public ArrayList<String> getRobots() {
+        return robotDiscovery.getRobots();
     }
 
 
@@ -57,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         Button connectButton = (Button) view;
         LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
         if (networkThread == null || !networkThread.connected()) {
-            String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
-
+//            String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
+            String IP = "1030";
             // Start thread with robot connection
             networkThread = NetworkThread.getInstance();
             networkThread.setIP(IP);
