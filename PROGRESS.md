@@ -73,6 +73,22 @@ Cleaned the code again. During the presentation the camera didn't work. Instead 
 TODOs:
 - fix connect button: oncreate the connect button says disconnect while there is no connection
 - send audio with dances
-- find nice connect and disconnect sound
-- ~~add app logo ~~
+- ~~add app logo~~
 - ~~save picture~~
+- add more dances
+- ~~set name and battery and stiffness visible / invisible~~
+- show toast when connected
+- ~~move connect button down a little bit~~
+- ~~move say button to bottom~~
+- ~~keyboard down when button clicked~~
+- ~~moves in gridview~~
+- ~~better picture on camera fragment~~
+- ~~don't allow landscape view~~
+- nicer buttons: create style and use on all buttons
+- ~~add scrollview to moves~~
+
+# day 16
+Created a dropdown list of robots on the network. This only works on a real device and not with the emulator. Fixed some minor bugs and todos (day 15) and cleaned the code.
+
+# day 17
+Fixed some minor bugs and todos (day 15) and cleaned the code.
