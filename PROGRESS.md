@@ -71,7 +71,7 @@ Cleaned the code. Most functions of a specific part are now in their own fragmen
 Cleaned the code again. During the presentation the camera didn't work. Instead of video, the user can now only take a picture to reduce the amount of data send. This works fine. New moves are added. 
 
 TODOs:
-- fix connect button: oncreate the connect button says disconnect while there is no connection
+- ~~fix connect button: oncreate the connect button says disconnect while there is no connection~~
 - send audio with dances
 - ~~add app logo~~
 - ~~save picture~~
@@ -86,6 +86,13 @@ TODOs:
 - ~~don't allow landscape view~~
 - nicer buttons: create style and use on all buttons
 - ~~add scrollview to moves~~
+- toast when saving picture, maybe sound when taking picture
+- dropdown list style 
+- add enter ip in dropdown, when selected, show edit box
+- test dropdown list with robot name
+
+Bugs:
+- stiffness doesn't work on first connect
 
 # day 16
 Created a dropdown list of robots on the network. This only works on a real device and not with the emulator. Fixed some minor bugs and todos (day 15) and cleaned the code.
