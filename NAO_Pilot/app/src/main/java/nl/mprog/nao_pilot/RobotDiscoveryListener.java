@@ -57,10 +57,7 @@ public class RobotDiscoveryListener implements NsdManager.DiscoveryListener {
         Log.d(String.valueOf(service), "Service discovery success");
         Log.d("SERVICE", "<" + service.getServiceType() + ">");
         if (service.getServiceType().equals("_naoqi._tcp.")) {
-            if (!robots.contains(service.getServiceName())) {
-                robots.add(service.getServiceName());
-                Log.d(service.getServiceName(), "onServiceFound: robots found");
-            }
+            nsdManager.resolveService(service, new RobotResolveListener(robots));
         }
         Log.d(service.getServiceName(), "onServiceFound: oeps");
     }

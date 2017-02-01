@@ -18,11 +18,16 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         nsdManager.discoverServices("_naoqi._tcp.", NsdManager.PROTOCOL_DNS_SD, robotDiscovery);
     }
 
+
     public ArrayList<String> getRobots() {
         return robotDiscovery.getRobots();
     }
@@ -70,25 +76,37 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         Button connectButton = (Button) view;
         LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
         if (networkThread == null || !networkThread.connected()) {
-            String IP = ((EditText) findViewById(R.id.IP)).getText().toString();
-//            String IP = "1030";
+            Spinner dropdown = (Spinner) findViewById(R.id.robotsDropdown);
+            String IP = (String) dropdown.getSelectedItem();
+            if (IP == null) {
+                return;
+            }
+            // TODO: delete is for debugging with emulator
+//            IP = ((EditText) findViewById(R.id.IP)).getText().toString();
 //             Start thread with robot connection
             networkThread = NetworkThread.getInstance();
             networkThread.setIP(IP);
             networkThread.setHandler(handler);
             new Thread(networkThread).start();
 
-            // Get info from the robot
-            JSONObject json = new JSONObject();
-            try {
-                json.put("type", "info");
-            } catch (JSONException e) {
-                e.printStackTrace();
+            // Change button text and show robot info if connected
+            if (networkThread != null && networkThread.connected()) {
+                // Get info from the robot
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("type", "info");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                networkThread.sendMessage(json);
+
+                connectButton.setText("Disconnect");
+                robotInfo.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(this, "Connection failed, please try again.", Toast.LENGTH_SHORT);
             }
-            networkThread.sendMessage(json);
-            // Change button text and show robot info
-            connectButton.setText("Disconnect");
-            robotInfo.setVisibility(View.VISIBLE);
+
+
         } else {
             // Close thread
             if (networkThread != null) {
@@ -165,6 +183,16 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                             stiffness = Boolean.parseBoolean(message.getString("stiffness"));
                             showInfo();
                             break;
+                        case "disconnect":
+                            Toast.makeText(getApplicationContext(), message.getString("text"), Toast.LENGTH_SHORT).show();
+                            // Change button text and hide robot info
+                            Button connectButton = (Button) findViewById(R.id.connectButton);
+                            LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
+                            connectButton.setText("Connect");
+                            robotInfo.setVisibility(View.INVISIBLE);
+                            break;
+                        case "error":
+                            Toast.makeText(getApplicationContext(), message.getString("text"), Toast.LENGTH_SHORT).show();
                         default:
                     }
                 } catch (JSONException e) {

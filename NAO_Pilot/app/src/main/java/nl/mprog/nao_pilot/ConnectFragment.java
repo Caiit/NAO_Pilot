@@ -43,6 +43,7 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
 
         // Set dropdown
         setRobotsDropdown();
+
         // Set listeners
         view.findViewById(R.id.stiffBox).setOnClickListener(this);
         return view;
@@ -51,9 +52,10 @@ public class ConnectFragment extends Fragment implements View.OnClickListener {
 
     private void setRobotsDropdown() {
         Spinner dropdown = (Spinner) view.findViewById(R.id.robotsDropdown);
-        ArrayList<String> robotsArrayList = mainActivity.getRobots();
-        String[] robots = robotsArrayList.toArray(new String[robotsArrayList.size()]);
+        ArrayList<String> robots = mainActivity.getRobots();
+        System.out.println(robots);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, robots);
+        adapter.setNotifyOnChange(true);
         dropdown.setAdapter(adapter);
     }
 

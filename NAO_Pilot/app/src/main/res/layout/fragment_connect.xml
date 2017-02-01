@@ -21,15 +21,15 @@
         android:spinnerMode="dropdown" />
 
     <!--TODO: weghalen-->
-    <EditText
-        android:text="10.42.0.180"
-        android:padding="10dp"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberSigned"
-        android:digits="0123456789."
-        android:id="@+id/IP" />
+    <!--<EditText-->
+        <!--android:text="10.42.0.180"-->
+        <!--android:padding="10dp"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:inputType="numberSigned"-->
+        <!--android:digits="0123456789."-->
+        <!--android:id="@+id/IP" />-->
 
     <Button
         android:layout_margin="20dp"

@@ -10,8 +10,10 @@ import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -86,16 +88,11 @@ public class NetworkThread implements Runnable {
             in = new DataInputStream(client.getInputStream());
 
             Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
-
-//            // Wait until message from server available
-//            while (in.available() == 0) {
-//            }
-//
-//            byte[] bytes = new byte[in.available()];
-//            in.read(bytes);
-//            Log.d("Server says: " + fromBytes(bytes), "createSocket: ");
         } catch (IOException e) {
             Log.d("Could not connect", "createSocket: No connection possible");
+            Message msg = Message.obtain();
+            msg.obj = "{\"type\": \"disconnect\", \"text\": \"Could not connect\"}";
+            handler.sendMessage(msg);
             e.printStackTrace();
             shutdown = true;
         }
