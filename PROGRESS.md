@@ -77,7 +77,7 @@ TODOs:
 - ~~save picture~~
 - add more dances
 - ~~set name and battery and stiffness visible / invisible~~
-- show toast when connected
+- ~~show toast when connected~~
 - ~~move connect button down a little bit~~
 - ~~move say button to bottom~~
 - ~~keyboard down when button clicked~~
@@ -86,16 +86,19 @@ TODOs:
 - ~~don't allow landscape view~~
 - nicer buttons: create style and use on all buttons
 - ~~add scrollview to moves~~
-- toast when saving picture, maybe sound when taking picture
+- ~~toast when saving picture, maybe sound when taking picture~~
 - dropdown list style 
-- add enter ip in dropdown, when selected, show edit box
-- test dropdown list with robot name
+- ~~test dropdown list with robot name~~
 
 Bugs:
 - stiffness doesn't work on first connect
+- dropdown doesn't work on start
 
 # day 16
 Created a dropdown list of robots on the network. This only works on a real device and not with the emulator. Fixed some minor bugs and todos (day 15) and cleaned the code.
 
 # day 17
 Fixed some minor bugs and todos (day 15) and cleaned the code.
+
+# day 18 
+Talked to RobotWise that wants to use my app. Fixed some more bugs and todos and cleaned the code again. Python code is now pep8 correct. 
