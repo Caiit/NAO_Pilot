@@ -14,10 +14,16 @@ import vision_definitions
 import Image
 import base64
 
-# ---------------- THREADING CLASS ----------------------------
+"""
+Threading class. Handles the network between the
+robot and the app.
+"""
+
+
 class networkThread (threading.Thread):
-
-
+    """
+    Constructor, set all variables.
+    """
     def __init__(self):
         threading.Thread.__init__(self)
         self.shutdown = False
@@ -25,12 +31,13 @@ class networkThread (threading.Thread):
         self.connection = None
         self.inMessages = Queue.Queue()
         self.outMessages = Queue.Queue()
-        self.buffer = ""
-        self.HOST = ""
         self.PORT = 3006
         self.errorSend = False
 
-
+    """
+    Start the thread. Create a server and send and
+    receive message from the app.
+    """
     def run(self):
         self.createServer()
         while (not self.shutdown):
@@ -44,18 +51,21 @@ class networkThread (threading.Thread):
         print "Closing server"
         self.serverSocket.close()
 
-
+    """
+    Create a server.
+    """
     def createServer(self):
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 99999999)
+        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF,
+                                     99999999)
         self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print 'Socket created'
 
         # Bind socket to local host and port
         try:
-            self.serverSocket.bind((self.HOST, self.PORT))
+            self.serverSocket.bind(("", self.PORT))
         except socket.error as msg:
-            print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+            print 'Bind failed. Error: ' + str(msg[0]) + ' Message ' + msg[1]
             sys.exit()
 
         print 'Socket bind complete'
@@ -64,8 +74,11 @@ class networkThread (threading.Thread):
         self.serverSocket.listen(1)
         print 'Socket now listening'
 
-
+    """
+    Receive messages from the app.
+    """
     def receiveMessages(self):
+        # Receive size of message
         size = 0
         try:
             msg = self.connection.recv(10)[2:]
@@ -76,12 +89,11 @@ class networkThread (threading.Thread):
                 # Waiting for new message
                 self.errorSend = False
                 return
-            print "Other problem with connection: Disconnected"
-            self.connection = None
-            self.outMessages.put('{"type": "disconnect"}')
         except ValueError:
             if not self.errorSend:
-                self.outMessages.put('{"type": "error", "kind": "value", "text": "Could not read message, please send again"}')
+                msg = '{"type": "error", "kind": "value", "text": \
+                        "Could not read message, please send again"}'
+                self.outMessages.put(msg)
                 self.errorSend = True
             return
         if (not size):
@@ -90,20 +102,24 @@ class networkThread (threading.Thread):
             print "Disconnected"
             return
 
+        # Receive message
         try:
             data = self.connection.recv(100)
             while (len(data) < size):
-                msgTest = self.connection.recv(size - len(data))
-                data += msgTest
-        except IOError as e:  # and here it is handeled
+                data += self.connection.recv(size - len(data))
+        except IOError as e:
             if e.errno == errno.EWOULDBLOCK:
                 # Waiting for new message
                 return
-            print "Other problem with connection: closed"
+            print "Problem with connection: closed"
             self.connection = None
+            self.inMessages.put('{"type": "disconnect"}')
+            print "Disconnected"
         self.inMessages.put(data)
 
-
+    """
+    Send the messages from the outMessages queue to the app.
+    """
     def sendMessage(self):
         if (self.connection and not self.outMessages.empty()):
             message = self.outMessages.get_nowait().encode("UTF-8") + chr(0)
@@ -112,152 +128,204 @@ class networkThread (threading.Thread):
             self.connection.send(sendString)
 
 
-IP = "localhost"
-thread = networkThread()
+"""
+Robot class. Handles the messages from the app by
+letting the robot do what asked.
+"""
 
-# Proxies
-tts = ALProxy("ALTextToSpeech", IP, 9559)
-motionProxy = ALProxy("ALMotion", IP, 9559)
-postureProxy = ALProxy("ALRobotPosture", IP, 9559)
-camProxy = ALProxy("ALVideoDevice", IP, 9559)
-batteryProxy = ALProxy("ALBattery", IP, 9559)
-systemProxy = ALProxy("ALSystem", IP, 9559)
 
-def toJson(data):
-    try:
-        return json.loads(data)
-    except:
-        print "No valid json"
-        return {"type": "error", "kind": "json", "text": "Could not read message, please send again"}
+class Robot():
+    """
+    Constructor, set all variables.
+    """
+    def __init__(self):
+        # Proxies
+        self.IP = "localhost"
+        self.tts = ALProxy("ALTextToSpeech", self.IP, 9559)
+        self.motionProxy = ALProxy("ALMotion", self.IP, 9559)
+        self.postureProxy = ALProxy("ALRobotPosture", self.IP, 9559)
+        self.camProxy = ALProxy("ALVideoDevice", self.IP, 9559)
+        self.batteryProxy = ALProxy("ALBattery", self.IP, 9559)
+        self.systemProxy = ALProxy("ALSystem", self.IP, 9559)
+
+        self.thread = networkThread()
+        self.thread.daemon = True
+        self.thread.start()
+        while (True):
+            self.handleMessages()
+
+    """
+    Convert a string to JSON.
+    """
+    def toJson(self, data):
+        try:
+            return json.loads(data)
+        except:
+            print "No valid json"
+            return {"type": "error", "kind": "json", "text":
+                    "Could not read message, please send again"}
+
+    """
+    Stop all connections and let the robot rest before
+    exiting the program.
+    """
+    def stopProgram(self):
+        self.motionProxy.rest()
+        if self.thread:
+            self.thread.shutdown = True
+
+    """
+    Set the stiffness to the given value.
+    """
+    def stiffness(self, part, value):
+        if value == 0.0:
+            self.motionProxy.rest()
+        self.motionProxy.setStiffnesses(part, value)
+
+    """
+    Get the robots info: name, battery and stiffness status
+    and add it to the threads outMessages queue.
+    """
+    def getInfo(self):
+        name = self.systemProxy.robotName()
+        battery = self.batteryProxy.getBatteryCharge()
+        stiffness = "false"
+        if all(i > 0.5 for i in self.motionProxy.getStiffnesses("Body")):
+            stiffness = "true"
+        self.thread.outMessages.put('{"type": "info", "name": "' + name +
+                                    '", "battery": "' + str(battery) +
+                                    '", "stiffness": "' + stiffness + '"}')
+
+    """
+    Let the robot speak the text with the given settings.
+    """
+    def speak(self, data):
+        self.tts.setVolume(float(data["volume"])/100)
+        pitch = float(data["pitch"]) / 100
+        if pitch > 0.0 and pitch < 1.0:
+            pitch = 1.0
+        self.tts.setParameter("pitchShift", pitch)
+        self.tts.say("\\rspd=" + str(data["speed"]) + "\\" + str(data["text"]))
+
+    """
+    Let the robot walk in the given direction with the
+    given speed.
+    """
+    def walk(self, data):
+        xSpeed = float(data["x_speed"])
+        ySpeed = float(data["y_speed"])
+        thetaSpeed = float(data["theta_speed"])
+        if (xSpeed == 0 and ySpeed == 0 and thetaSpeed == 0):
+            self.motionProxy.stopMove()
+            self.postureProxy.goToPosture("StandInit", 0.5)
+        else:
+            self.postureProxy.goToPosture("StandInit", 0.5)
+            self.motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
+
+    """
+    Let the robot take a picture and add it to the
+    threads outMessages queue.
+    """
+    def takePicture(self):
+        resolution = vision_definitions.kQVGA
+        colorSpace = vision_definitions.kRGBColorSpace
+        fps = 20
+
+        nameId = self.camProxy.subscribe("camera", resolution, colorSpace, fps)
+
+        naoImage = self.camProxy.getImageRemote(nameId)
+        self.camProxy.unsubscribe(nameId)
+
+        if not naoImage:
+            self.thread.outMessages.put('{"type": "error", "kind": "picture",
+                                          "text": "Could not take picture"}')
+            return
+
+        self.tts.say("Say \\rspd=70\\cheese")
+
+        # Get the image size and pixel array.
+        imageWidth = naoImage[0]
+        imageHeight = naoImage[1]
+        array = naoImage[6]
+
+        # Create a PIL Image from our pixel array.
+        im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
+
+        # Save the image.
+        im.save("camImage.png", "PNG")
+
+        with open("camImage.png", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+        self.thread.outMessages.put('{"type": "picture", "img": "' +
+                                    encoded_string + '"}')
+
+    """
+    Let the robot execute the given move file.
+    """
+    def moves(self, data):
+        code = data["file"]
+        if code == "stand":
+            self.postureProxy.goToPosture("StandInit", 0.5)
+        elif code == "sit":
+            self.motionProxy.rest()
+        else:
+            try:
+                self.postureProxy.goToPosture("StandInit", 0.5)
+                exec(code)
+                if names:
+                    self.motionProxy.angleInterpolationBezier(names, times,
+                                                              keys)
+                self.postureProxy.goToPosture("StandInit", 0.5)
+            except:
+                msg = '{"type": "error", "kind": "move",
+                        "text": "Could not perform move, try again"}'
+                self.thread.outMessages.put(msg)
+
+    """
+    Handle the messages received from the app.
+    """
+    def handleMessages(self):
+        if self.thread.inMessages.empty():
+            return
+
+        data = self.toJson(self.thread.inMessages.get())
+
+        dataType = data["type"]
+        if dataType == "connect":
+            self.tts.say("Oh")
+        elif dataType == "stiffness":
+            self.stiffness(str(data["part"]), float(data["value"]))
+        elif dataType == "info":
+            self.getInfo()
+        elif dataType == "speak":
+            self.speak(data)
+        elif dataType == "walk":
+            self.walk(data)
+        elif dataType == "picture":
+            self.takePicture()
+        elif dataType == "moves":
+            self.moves(data)
+        elif dataType == "disconnect":
+            self.tts.say("ByeBye")
+            self.motionProxy.rest()
+
+"""
+Main program.
+"""
+
+
+# Robot object
+robot = Robot()
 
 
 def onExit():
-    motionProxy.rest()
     print "Exiting"
-    if thread:
-        thread.shutdown = True
-
-
-def stiffness(part, value):
-    if value == 0.0:
-        motionProxy.rest()
-    motionProxy.setStiffnesses(part, value)
-
-
-def getInfo():
-    name = systemProxy.robotName()
-    battery = batteryProxy.getBatteryCharge()
-    stiffness = "false"
-    if all(i > 0.5 for i in motionProxy.getStiffnesses("Body")):
-        stiffness = "true"
-    thread.outMessages.put('{"type": "info", "name": "' + name +
-                           '", "battery": "' + str(battery) + '", "stiffness": "'
-                            + stiffness + '"}')
-
-
-def speak(data):
-    tts.setVolume(float(data["volume"])/100)
-    pitch = float(data["pitch"]) / 100
-    if pitch > 0.0 and pitch < 1.0: pitch = 1.0
-    tts.setParameter("pitchShift", pitch)
-    tts.say("\\rspd=" + str(data["speed"]) + "\\" + str(data["text"]))
-
-
-def walk(data):
-    xSpeed = float(data["x_speed"])
-    ySpeed = float(data["y_speed"])
-    thetaSpeed = float(data["theta_speed"])
-    if (xSpeed == 0 and ySpeed == 0 and thetaSpeed == 0):
-        motionProxy.stopMove()
-        postureProxy.goToPosture("StandInit", 0.5)
-    else:
-        postureProxy.goToPosture("StandInit", 0.5)
-        motionProxy.moveToward(xSpeed, ySpeed, thetaSpeed)
-
-
-def takePicture():
-    resolution = vision_definitions.kQVGA
-    colorSpace = vision_definitions.kRGBColorSpace
-    fps = 20
-
-    nameId = camProxy.subscribe("camera", resolution, colorSpace, fps)
-
-    naoImage = camProxy.getImageRemote(nameId)
-    camProxy.unsubscribe(nameId)
-
-
-    if not naoImage:
-        thread.outMessages.put('{"type": "error", "kind": "picture", "text": "Could not take picture"}')
-        return
-
-    tts.say("Say \\rspd=70\\cheese")
-
-    # Get the image size and pixel array.
-    imageWidth = naoImage[0]
-    imageHeight = naoImage[1]
-    array = naoImage[6]
-
-    # Create a PIL Image from our pixel array.
-    im = Image.fromstring("RGB", (imageWidth, imageHeight), array)
-
-    # Save the image.
-    im.save("camImage.png", "PNG")
-
-    with open("camImage.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    image_file.close()
-    thread.outMessages.put('{"type": "picture", "img": "' + encoded_string + '"}')
-
-
-def moves(data):
-    code = data["file"]
-    if code == "stand":
-        postureProxy.goToPosture("StandInit", 0.5)
-    elif code == "sit":
-        motionProxy.rest()
-    else:
-        try:
-            exec(code)
-            if names:
-                motionProxy.angleInterpolationBezier(names, times, keys)
-            postureProxy.goToPosture("StandInit", 0.5)
-        except:
-            thread.outMessages.put('{"type": "error", "kind": "move", "text": "Could not perform move, try again"}')
-
-
-def handleMessages():
-    if thread.inMessages.empty():
-        return
-
-    data = toJson(thread.inMessages.get())
-
-    dataType = data["type"]
-    if dataType == "connect":
-        tts.say("Oh")
-    elif dataType == "stiffness":
-        stiffness(str(data["part"]), float(data["value"]))
-    elif dataType == "info":
-        getInfo()
-    elif dataType == "speak":
-        speak(data)
-    elif dataType == "walk":
-        walk(data)
-    elif dataType == "picture":
-        takePicture()
-    elif dataType == "moves":
-        moves(data)
-    elif dataType == "disconnect":
-        tts.say("ByeBye")
-        motionProxy.rest()
+    robot.stopProgram()
 
 
 def main():
     atexit.register(onExit)
-    thread.daemon = True
-    thread.start()
-    while (True):
-        handleMessages()
-
 
 if __name__ == "__main__":
     main()

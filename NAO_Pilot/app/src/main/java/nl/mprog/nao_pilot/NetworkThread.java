@@ -74,7 +74,6 @@ class NetworkThread implements Runnable {
         }
         IP = null;
         thread = null;
-        outMessages = null;
     }
 
     /**
