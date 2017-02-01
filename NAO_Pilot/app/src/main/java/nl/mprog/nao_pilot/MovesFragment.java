@@ -54,6 +54,7 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.waveButton).setOnClickListener(this);
         view.findViewById(R.id.guitarButton).setOnClickListener(this);
         view.findViewById(R.id.robotButton).setOnClickListener(this);
+        view.findViewById(R.id.kickButton).setOnClickListener(this);
 
         return view;
     }
@@ -78,6 +79,9 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.robotButton:
                 fileName = "robot.txt";
+                break;
+            case R.id.kickButton:
+                fileName = "kick.txt";
             default:
                 break;
         }
