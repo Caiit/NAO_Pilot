@@ -2,12 +2,10 @@ package nl.mprog.nao_pilot;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -20,10 +18,11 @@ import org.json.JSONObject;
  * UvA Programmeerproject
  *
  * The walk fragment of the app.
- * Let the robot walk.
+ * Let the robot walk in the appropriate direaction with the given speed.
  */
 
-public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, View.OnTouchListener {
+public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeListener,
+        View.OnTouchListener {
 
     View view;
     NetworkThread networkThread;
@@ -45,6 +44,9 @@ public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
         return view;
     }
 
+    /**
+     * Handle the progress bar.
+     */
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         TextView speedText = (TextView) view.findViewById(R.id.speedTextWalk);
@@ -61,6 +63,9 @@ public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
     }
 
+    /**
+     * Handle the walk buttons.
+     */
     @Override
     public boolean onTouch(View v, MotionEvent motionEvent) {
         String speedText = (String) ((TextView) view.findViewById(R.id.speedTextWalk)).getText();
@@ -103,7 +108,7 @@ public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                networkThread.sendMessage(json);
+                networkThread.addToSend(json);
             }
             return true;
         } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -117,7 +122,7 @@ public class WalkFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            networkThread.sendMessage(json);
+            networkThread.addToSend(json);
             return true;
         }
         return false;

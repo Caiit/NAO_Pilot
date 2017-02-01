@@ -8,7 +8,7 @@
     <TableLayout
         android:id="@+id/movesTableLayout"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:gravity="center">
 
         <TableRow
@@ -22,7 +22,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Stand"
+                    android:text="@string/stand"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"
@@ -41,7 +41,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Sit"
+                    android:text="@string/sit"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"
@@ -65,7 +65,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Wave"
+                    android:text="@string/wave"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"
@@ -84,7 +84,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Guitar"
+                    android:text="@string/guitar"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"
@@ -109,7 +109,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Robot"
+                    android:text="@string/robot"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"
@@ -127,7 +127,7 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
-                    android:text="Kick"
+                    android:text="@string/kick"
                     android:textSize="25sp"
                     android:shadowColor="@color/colorPrimaryDark"
                     android:shadowRadius="5"

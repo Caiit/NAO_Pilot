@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">NAO_Pilot</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="save_picture">Save Picture</string>
+    <string name="robotpicture">robotPicture</string>
+    <string name="select_your_robot">Select your robot</string>
+    <string name="connect">Connect</string>
+    <string name="name">Name:</string>
+    <string name="battery">Battery:</string>
+    <string name="stiffness">Stiffness</string>
+    <string name="stand">Stand</string>
+    <string name="sit">Sit</string>
+    <string name="wave">Wave</string>
+    <string name="guitar">Guitar</string>
+    <string name="robot">Robot</string>
+    <string name="kick">Kick</string>
+    <string name="say">Say</string>
+    <string name="volume_100">Volume: 100 %</string>
+    <string name="speed_100">Speed: 100 %</string>
+    <string name="pitch_100">Pitch: 100 %</string>
+    <string name="turnleft">turnLeft</string>
+    <string name="left">left</string>
+    <string name="turnright">turnright</string>
+    <string name="right">right</string>
+    <string name="up">up</string>
+    <string name="down">down</string>
 </resources>

@@ -10,10 +10,8 @@ import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -23,10 +21,12 @@ import java.util.Queue;
  * Caitlin Lagrand (10759972)
  * UvA Programmeerproject
  *
- * NetworkThread creates a client that connects to the server on the robot.
+ * Singleton NetworkThread creates a client that connects to the server on the robot.
+ * Sends messages from the app to the robot.
+ * Receives messages from the robot and add them to the handler of the mainActivity.
  */
 
-public class NetworkThread implements Runnable {
+class NetworkThread implements Runnable {
 
     private static NetworkThread thread = new NetworkThread();
     private String IP;
@@ -37,36 +37,35 @@ public class NetworkThread implements Runnable {
     private DataOutputStream out;
     private Queue outMessages = new LinkedList();
 
-    public static NetworkThread getInstance() {
+    /**
+     * Get the network thread singleton.
+     */
+    static NetworkThread getInstance() {
         if (thread == null) thread = new NetworkThread();
         return thread;
     }
 
+    /**
+     * NetworkThread constructor.
+     */
     private NetworkThread() {
     }
 
-    public boolean connected() {
-        return IP != null;
-    }
-
-    public void setIP(String IP) {
-        this.IP = IP;
-    }
-
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-
+    /**
+     * Run the networkthread. Create a socket connection and send and
+     * receive messages until connection is closed.
+     */
     public void run() {
         createSocket();
         while (!shutdown) {
-            handleMessage((JSONObject) outMessages.poll());
+            sendMessage((JSONObject) outMessages.poll());
             receiveMessages();
         }
         // Close client
         try {
             if (out != null) {
-                outMessages.add((toJson("disconnect", "Closing connection from the app.").toString()));
+                String msg = toJson("disconnect", "Closing connection from the app.").toString();
+                outMessages.add(msg);
                 Log.d("Closed successfully", "run: Connection closed");
             }
             client.close();
@@ -75,21 +74,59 @@ public class NetworkThread implements Runnable {
         }
         IP = null;
         thread = null;
+        outMessages = null;
     }
 
+    /**
+     * Return if robot is connected or not.
+     */
+    boolean connected() {
+        return IP != null;
+    }
+
+    /**
+     * Set the ip of the robot.
+     */
+    void setIP(String IP) {
+        this.IP = IP;
+    }
+
+    /**
+     * Set the handler of the mainactivity.
+     */
+    void setHandler(Handler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * Add a message to the outMessage queue.
+     */
+    void addToSend(JSONObject message) {
+        outMessages.add(message);
+    }
+
+    /**
+     * Close the thread.
+     */
+    void closeThread() {
+        shutdown = true;
+    }
+
+    /**
+     * Create a socket client that connects to the robot.
+     */
     private void createSocket() {
         int port = 3006;
         try {
-            Log.d("Connecting to " + IP + " on port " + port, "createSocket: ");
+            System.out.println("Connecting to " + IP + " on port " + port);
             client = new Socket();
             client.connect(new InetSocketAddress(IP, port), 1000);
-            Log.d(String.valueOf(client), "createSocket: socket created");
+            // Create input and output streams
             out = new DataOutputStream(client.getOutputStream());
             in = new DataInputStream(client.getInputStream());
-
-            Log.d("Just connected to " + client.getRemoteSocketAddress(), "createSocket: ");
+            System.out.println("Just connected to " + client.getRemoteSocketAddress());
         } catch (IOException e) {
-            Log.d("Could not connect", "createSocket: No connection possible");
+            // Connection failed, send error message
             Message msg = Message.obtain();
             msg.obj = "{\"type\": \"disconnect\", \"text\": \"Could not connect\"}";
             handler.sendMessage(msg);
@@ -98,26 +135,9 @@ public class NetworkThread implements Runnable {
         }
     }
 
-    private String fromBytes( byte[] bytes) {
-        for (int i = bytes.length - 1; i > 0; i--) {
-            if (bytes[i] == 0) {
-                return new String(bytes, 0, i);
-            }
-        }
-        return new String(bytes);
-    }
-
-    private JSONObject toJson(String type, String message) {
-        JSONObject json = new JSONObject();
-        try {
-            json.put("type", type);
-            json.put("text", message);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return json;
-    }
-
+    /**
+     * Receive messages from the robot via the socket connection.
+     */
     private void receiveMessages() {
         try {
             if (in.available() > 0) {
@@ -128,55 +148,69 @@ public class NetworkThread implements Runnable {
                 try {
                     size = Integer.parseInt(new String(byteSize));
                 } catch (NumberFormatException nfe) {
-                    Log.d("No number", "receiveMessages: Message doesn't start with a number");
+                    System.out.println("Message doesn't start with a number");
                     return;
                 }
                 // Read message
                 String message = "";
-                while (in.available() < size ) {
-                    // TODO: timer toeveogen
-                }
+                while (in.available() < size ) {}
                 while (message.length() < size - 1) {
                     int bufferSize = size - message.length();
-
                     byte[] byteMessage = new byte[bufferSize];
                     int bytesRead = in.read(byteMessage);
-
                     byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
                     message += fromBytes(validBytes);
                 }
                 // Add message to the messages handler of the main thread
-                Log.d(message, "receiveMessages: message");
                 Message msg = Message.obtain();
                 msg.obj = message;
                 handler.sendMessage(msg);
             }
         } catch (IOException e) {
-            Log.d("Receiving failed", "receiveMessages: ");
+            System.out.println("Receiving message failed.");
             e.printStackTrace();
         }
     }
 
-    private void handleMessage(JSONObject message) {
+    /**
+     * Send the messages from the outMessages queue to the robot.
+     */
+    private void sendMessage(JSONObject message) {
         try {
             if (out != null && message != null) {
-                Log.d(String.valueOf(message), "handleMessage: message");
                 String strMessage = message.toString();
                 String len = String.format("%08d", strMessage.length());
-                System.out.println(len + strMessage);
                 out.writeUTF(len + strMessage);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d("Send failed", "sendMessage: sending message failed.");
+            System.out.println("Sending message failed.");
         }
     }
 
-    void sendMessage(JSONObject message) {
-        outMessages.add(message);
+    /**
+     * Convert byte array to string.
+     */
+    private String fromBytes(byte[] bytes) {
+        for (int i = bytes.length - 1; i > 0; i--) {
+            if (bytes[i] == 0) {
+                return new String(bytes, 0, i);
+            }
+        }
+        return new String(bytes);
     }
 
-    void closeThread() {
-        shutdown = true;
+    /**
+     * Convert the given message of to JSON.
+     */
+    private JSONObject toJson(String type, String message) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", type);
+            json.put("text", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 }

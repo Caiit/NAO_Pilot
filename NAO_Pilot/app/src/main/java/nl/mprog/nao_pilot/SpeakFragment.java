@@ -3,7 +3,6 @@ package nl.mprog.nao_pilot;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +20,11 @@ import org.json.JSONObject;
  * UvA Programmeerproject
  *
  * The speak fragment of the app.
- * Let the robot say the appropriate text.
+ * Let the robot say the appropriate text with the given settings.
  */
 
-public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
+public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeListener,
+        View.OnClickListener {
 
     private View view;
     private NetworkThread networkThread;
@@ -37,7 +37,6 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_speak, container, false);
         networkThread = NetworkThread.getInstance();
-        Log.d("SPEAK FRAGMENT", "onCreateView: ON CREATE VIEW");
 
         // Set listeners
         ((SeekBar) view.findViewById(R.id.seekBarVolume)).setOnSeekBarChangeListener(this);
@@ -47,6 +46,9 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
         return view;
     }
 
+    /**
+     * Handle the say button.
+     */
     @Override
     public void onClick(View v) {
         if (networkThread != null) {
@@ -63,7 +65,7 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            networkThread.sendMessage(json);
+            networkThread.addToSend(json);
             // Hide keyboard after click
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
@@ -71,6 +73,9 @@ public class SpeakFragment extends Fragment implements SeekBar.OnSeekBarChangeLi
         }
     }
 
+    /**
+     * Handle the progress bars.
+     */
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         switch (seekBar.getId()) {

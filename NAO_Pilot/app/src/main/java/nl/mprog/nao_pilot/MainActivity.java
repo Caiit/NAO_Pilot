@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -25,10 +24,19 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
+
+/**
+ * NAO Pilot
+ * Caitlin Lagrand (10759972)
+ * UvA Programmeerproject
+ *
+ * The main activity of the app.
+ * Generates the tabs used by the fragments.
+ * Handles the network connection with the robot:
+ *  connects/disconnects the robot
+ *  handles messages from the robot
+ */
 
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
@@ -62,11 +70,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     }
 
 
-    public ArrayList<String> getRobots() {
-        return robotDiscovery.getRobots();
-    }
-
-
     /**
      * Onclick from the connect button.
      *
@@ -76,14 +79,13 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         Button connectButton = (Button) view;
         LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
         if (networkThread == null || !networkThread.connected()) {
+            // Get IP from dropdown list
             Spinner dropdown = (Spinner) findViewById(R.id.robotsDropdown);
             String IP = (String) dropdown.getSelectedItem();
             if (IP == null) {
                 return;
             }
-            // TODO: delete is for debugging with emulator
-//            IP = ((EditText) findViewById(R.id.IP)).getText().toString();
-//             Start thread with robot connection
+            // Start thread with robot connection
             networkThread = NetworkThread.getInstance();
             networkThread.setIP(IP);
             networkThread.setHandler(handler);
@@ -98,15 +100,11 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                networkThread.sendMessage(json);
+                networkThread.addToSend(json);
 
                 connectButton.setText("Disconnect");
                 robotInfo.setVisibility(View.VISIBLE);
-            } else {
-                Toast.makeText(this, "Connection failed, please try again.", Toast.LENGTH_SHORT);
             }
-
-
         } else {
             // Close thread
             if (networkThread != null) {
@@ -134,11 +132,64 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         stiffBox.setChecked(stiffness);
 
         LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
-        if (networkThread != null && networkThread.connected() && robotInfo != null) {
+        if (robotInfo == null) {
+            return;
+        }
+        if (networkThread != null && networkThread.connected()) {
             robotInfo.setVisibility(View.VISIBLE);
         } else {
             robotInfo.setVisibility(View.INVISIBLE);
         }
+    }
+
+    /**
+     * Get the robots found on the current network.
+     */
+    public ArrayList<String> getRobots() {
+        return robotDiscovery.getRobots();
+    }
+
+    /**
+     * Set the handler that handles messages from the networkthread.
+     */
+    private void setHandler() {
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                JSONObject message;
+                try {
+                    message = new JSONObject((String)msg.obj);
+                    switch (message.getString("type")) {
+                        case "picture":
+                            setImage(message.getString("img"));
+                            break;
+                        case "info":
+                            name = message.getString("name");
+                            battery = Integer.parseInt(message.getString("battery"));
+                            Log.d(message.getString("stiffness"), "handleMessage: ");
+                            stiffness = Boolean.parseBoolean(message.getString("stiffness"));
+                            showInfo();
+                            break;
+                        case "disconnect":
+                            Toast.makeText(getApplicationContext(), message.getString("text"),
+                                    Toast.LENGTH_SHORT).show();
+                            // Change connect button and hide robot info
+                            Button connectButton = (Button) findViewById(R.id.connectButton);
+                            LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
+                            connectButton.setText("Connect");
+                            robotInfo.setVisibility(View.INVISIBLE);
+                            break;
+                        case "error":
+                            Toast.makeText(getApplicationContext(), message.getString("text"),
+                                    Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     /**
@@ -159,47 +210,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         if (imgView != null && image != null) {
             imgView.setImageBitmap(bitmap);
         }
-    }
-
-    /**
-     * Set the handler that handles messages from the networkthread.
-     */
-    private void setHandler() {
-        // TODO: error messages handlen
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                JSONObject message;
-                try {
-                    message = new JSONObject((String)msg.obj);
-                    switch (message.getString("type")) {
-                        case "picture":
-                            setImage(message.getString("img"));
-                            break;
-                        case "info":
-                            name = message.getString("name");
-                            battery = Integer.parseInt(message.getString("battery"));
-                            Log.d(message.getString("stiffness"), "handleMessage: ");
-                            stiffness = Boolean.parseBoolean(message.getString("stiffness"));
-                            showInfo();
-                            break;
-                        case "disconnect":
-                            Toast.makeText(getApplicationContext(), message.getString("text"), Toast.LENGTH_SHORT).show();
-                            // Change button text and hide robot info
-                            Button connectButton = (Button) findViewById(R.id.connectButton);
-                            LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
-                            connectButton.setText("Connect");
-                            robotInfo.setVisibility(View.INVISIBLE);
-                            break;
-                        case "error":
-                            Toast.makeText(getApplicationContext(), message.getString("text"), Toast.LENGTH_SHORT).show();
-                        default:
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
     }
 
     /**

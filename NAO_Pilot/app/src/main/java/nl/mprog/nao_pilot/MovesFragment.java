@@ -1,32 +1,17 @@
 package nl.mprog.nao_pilot;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * NAO Pilot
@@ -34,7 +19,7 @@ import java.io.OutputStream;
  * UvA Programmeerproject
  *
  * The moves fragment of the app.
- * Take a picture with the robot.
+ * Let the robot perform the appropriate move.
  */
 
 public class MovesFragment extends Fragment implements View.OnClickListener {
@@ -60,11 +45,13 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
     }
 
 
+    /**
+     * Handle the moves buttons.
+     */
     @Override
     public void onClick(View view) {
         String fileName = "";
         switch (view.getId()) {
-            // TODO: logische knopjes maken en function toevoegen
             case R.id.standButton:
                 fileName = "stand";
                 break;
@@ -93,20 +80,19 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
                 if (fileName.equals("sit") || fileName.equals("stand")) {
                     json.put("file", fileName);
                 } else {
+                    // Get file
                     InputStream is = getContext().getAssets().open(fileName);
                     int size = is.available();
                     byte[] byteFile = new byte[size];
                     is.read(byteFile);
                     is.close();
-                    // Convert the buffer into a string.
+                    // Convert the file into a string.
                     String file = new String(byteFile);
                     Log.d(file, "onClick: file");
                     json.put("file", file);
                 }
-                networkThread.sendMessage(json);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+                networkThread.addToSend(json);
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }
