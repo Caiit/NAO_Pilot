@@ -28,7 +28,7 @@ class networkThread (threading.Thread):
         self.buffer = ""
         self.HOST = ""
         self.PORT = 3006
-        self.BUFFER_SIZE = 100000
+        self.errorSend = False
 
 
     def run(self):
@@ -74,13 +74,15 @@ class networkThread (threading.Thread):
         except IOError as e:
             if e.errno == errno.EWOULDBLOCK:
                 # Waiting for new message
+                self.errorSend = False
                 return
             print "Other problem with connection: Disconnected"
             self.connection = None
-            self.inMessages.put('{"type": "disconnect"}')
+            self.outMessages.put('{"type": "disconnect"}')
         except ValueError:
-            print "No valid size"
-            self.inMessages.put('{"type": "error", "text": "could not read message"}')
+            if not self.errorSend:
+                self.outMessages.put('{"type": "error", "kind": "value", "text": "Could not read message, please send again"}')
+                self.errorSend = True
             return
         if (not size):
             self.connection = None
@@ -111,11 +113,6 @@ class networkThread (threading.Thread):
 
 
 IP = "localhost"
-HOST = ''   # Symbolic name, meaning all available interfaces
-PORT = 3006 # Arbitrary non-privileged port
-MAX_CLIENTS = 5
-BUFFER_SIZE = 1024
-
 thread = networkThread()
 
 # Proxies
@@ -131,7 +128,7 @@ def toJson(data):
         return json.loads(data)
     except:
         print "No valid json"
-        return {"type": "error", "text": "No valid json"}
+        return {"type": "error", "kind": "json", "text": "Could not read message, please send again"}
 
 
 def onExit():
@@ -188,7 +185,12 @@ def takePicture():
     naoImage = camProxy.getImageRemote(nameId)
     camProxy.unsubscribe(nameId)
 
-    if not naoImage: return
+
+    if not naoImage:
+        thread.outMessages.put('{"type": "error", "kind": "picture", "text": "Could not take picture"}')
+        return
+
+    tts.say("Say \\rspd=70\\cheese")
 
     # Get the image size and pixel array.
     imageWidth = naoImage[0]
@@ -216,10 +218,11 @@ def moves(data):
     else:
         try:
             exec(code)
-            motionProxy.angleInterpolationBezier(names, times, keys)
+            if names:
+                motionProxy.angleInterpolationBezier(names, times, keys)
             postureProxy.goToPosture("StandInit", 0.5)
         except:
-            thread.outMessages.put('{"type": "error", "text": "could not perform move, try again"}')
+            thread.outMessages.put('{"type": "error", "kind": "move", "text": "Could not perform move, try again"}')
 
 
 def handleMessages():
@@ -231,7 +234,6 @@ def handleMessages():
     dataType = data["type"]
     if dataType == "connect":
         tts.say("Oh")
-        # TODO geluidje toevoegen
     elif dataType == "stiffness":
         stiffness(str(data["part"]), float(data["value"]))
     elif dataType == "info":
@@ -247,7 +249,6 @@ def handleMessages():
     elif dataType == "disconnect":
         tts.say("ByeBye")
         motionProxy.rest()
-        # TODO mooi geluidje toevoegen
 
 
 def main():

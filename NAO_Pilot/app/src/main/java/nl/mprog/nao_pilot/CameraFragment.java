@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,8 +36,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_camera, container, false);
         networkThread = NetworkThread.getInstance();
 
-        Log.d("CREATE CAMERA FRAGEMNT", "onCreateView: ");
-
         // Set button listeners
         view.findViewById(R.id.takePictureButton).setOnClickListener(this);
         view.findViewById(R.id.savePictureButton).setOnClickListener(this);
@@ -46,7 +45,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            // TODO: logische knopjes maken en function toevoegen
             case R.id.takePictureButton:
                 if (networkThread != null) {
                     // TODO: add settings
@@ -65,6 +63,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                 MediaStore.Images.Media.insertImage(view.getContext().getContentResolver(), img, "robot" , "from app");
+                Toast.makeText(view.getContext(), "Saved", Toast.LENGTH_SHORT).show();
                 break;
             default:
         }
