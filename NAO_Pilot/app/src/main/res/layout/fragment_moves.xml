@@ -12,7 +12,6 @@
         android:gravity="center">
 
         <TableRow
-            android:id="@+id/tableRow1"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:gravity="center">
@@ -43,7 +42,6 @@
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
         <TableRow
-        android:id="@+id/tableRow2"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:gravity="center">
@@ -67,15 +65,14 @@
                 android:layout_margin="10dp">
                 <Button
                     android:theme="@style/AppTheme.Button"
-                    android:text="@string/guitar"
+                    android:text="@string/blow_kisses"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:id="@+id/guitarButton" />
+                    android:id="@+id/kissesButton" />
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow3"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:gravity="center" >
@@ -86,11 +83,28 @@
                 android:layout_margin="10dp">
                 <Button
                     android:theme="@style/AppTheme.Button"
-                    android:text="@string/robot"
+                    android:text="@string/bow"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:id="@+id/robotButton" />
+                    android:id="@+id/bowButton" />
             </android.support.percent.PercentRelativeLayout>
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:theme="@style/AppTheme.Button"
+                    android:text="@string/wipe_head"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:id="@+id/wipeButton" />
+            </android.support.percent.PercentRelativeLayout>
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center" >
             <android.support.percent.PercentRelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -102,6 +116,18 @@
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
                     android:id="@+id/kickButton" />
+            </android.support.percent.PercentRelativeLayout>
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
+                <Button
+                    android:theme="@style/AppTheme.Button"
+                    android:text="@string/robot"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="100%"
+                    android:id="@+id/robotButton" />
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
     </TableLayout>

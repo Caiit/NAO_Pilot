@@ -37,9 +37,11 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
         view.findViewById(R.id.standButton).setOnClickListener(this);
         view.findViewById(R.id.sitButton).setOnClickListener(this);
         view.findViewById(R.id.waveButton).setOnClickListener(this);
-        view.findViewById(R.id.guitarButton).setOnClickListener(this);
         view.findViewById(R.id.robotButton).setOnClickListener(this);
         view.findViewById(R.id.kickButton).setOnClickListener(this);
+        view.findViewById(R.id.kissesButton).setOnClickListener(this);
+        view.findViewById(R.id.bowButton).setOnClickListener(this);
+        view.findViewById(R.id.wipeButton).setOnClickListener(this);
 
         return view;
     }
@@ -61,14 +63,20 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
             case R.id.waveButton:
                 fileName = "wave.txt";
                 break;
-            case R.id.guitarButton:
-                fileName = "guitar.txt";
-                break;
             case R.id.robotButton:
                 fileName = "robot.txt";
                 break;
             case R.id.kickButton:
                 fileName = "kick.txt";
+                break;
+            case R.id.kissesButton:
+                fileName = "blow_kisses.txt";
+                break;
+            case R.id.bowButton:
+                fileName = "bow.txt";
+                break;
+            case R.id.wipeButton:
+                fileName = "wipe_forehead.txt";
             default:
                 break;
         }
@@ -89,7 +97,6 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
                     is.close();
                     // Convert the file into a string.
                     String file = new String(byteFile);
-                    Log.d(file, "onClick: file");
                     json.put("file", file);
                 }
                 networkThread.addToSend(json);

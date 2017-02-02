@@ -24,4 +24,8 @@
     <string name="right">right</string>
     <string name="up">up</string>
     <string name="down">down</string>
+    <string name="arm_dance">Arm dance</string>
+    <string name="wipe_head">Wipe head</string>
+    <string name="blow_kisses">Blow kisses</string>
+    <string name="bow">Bow</string>
 </resources>
