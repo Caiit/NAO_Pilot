@@ -21,6 +21,7 @@
         android:spinnerMode="dropdown" />
 
     <Button
+        android:theme="@style/AppTheme.Button"
         android:layout_margin="20dp"
         android:text="@string/connect"
         android:layout_width="wrap_content"

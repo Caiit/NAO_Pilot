@@ -22,17 +22,11 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/stand"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:id="@+id/standButton"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null"/>
+                    android:id="@+id/standButton"/>
             </android.support.percent.PercentRelativeLayout>
 
             <android.support.percent.PercentRelativeLayout
@@ -41,17 +35,11 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/sit"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:id="@+id/sitButton"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null" />
+                    android:id="@+id/sitButton"/>
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
         <TableRow
@@ -65,16 +53,10 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/wave"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null"
                     android:id="@+id/waveButton" />
             </android.support.percent.PercentRelativeLayout>
 
@@ -84,16 +66,10 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/guitar"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null"
                     android:id="@+id/guitarButton" />
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
@@ -109,16 +85,10 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/robot"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null"
                     android:id="@+id/robotButton" />
             </android.support.percent.PercentRelativeLayout>
             <android.support.percent.PercentRelativeLayout
@@ -127,16 +97,10 @@
                 android:layout_weight="1"
                 android:layout_margin="10dp">
                 <Button
+                    android:theme="@style/AppTheme.Button"
                     android:text="@string/kick"
-                    android:textSize="25sp"
-                    android:shadowColor="@color/colorPrimaryDark"
-                    android:shadowRadius="5"
-                    android:textColor="@color/colorBackground"
-                    android:backgroundTint="@color/colorPrimary"
                     app:layout_widthPercent="100%"
                     app:layout_aspectRatio="100%"
-                    android:elevation="4dp"
-                    android:stateListAnimator="@null"
                     android:id="@+id/kickButton" />
             </android.support.percent.PercentRelativeLayout>
         </TableRow>
