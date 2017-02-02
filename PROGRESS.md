@@ -72,10 +72,9 @@ Cleaned the code again. During the presentation the camera didn't work. Instead 
 
 TODOs:
 - ~~fix connect button: oncreate the connect button says disconnect while there is no connection~~
-- send audio with dances
 - ~~add app logo~~
 - ~~save picture~~
-- add more dances
+- ~~add more dances~~
 - ~~set name and battery and stiffness visible / invisible~~
 - ~~show toast when connected~~
 - ~~move connect button down a little bit~~
@@ -84,14 +83,13 @@ TODOs:
 - ~~moves in gridview~~
 - ~~better picture on camera fragment~~
 - ~~don't allow landscape view~~
-- nicer buttons: create style and use on all buttons
+- ~~nicer buttons: create style and use on all buttons~~
 - ~~add scrollview to moves~~
 - ~~toast when saving picture, maybe sound when taking picture~~
-- dropdown list style 
+- ~~dropdown list style ~~
 - ~~test dropdown list with robot name~~
 
 Bugs:
-- stiffness doesn't work on first connect
 - dropdown doesn't work on start
 
 # day 16
@@ -102,3 +100,6 @@ Fixed some minor bugs and todos (day 15) and cleaned the code.
 
 # day 18 
 Talked to RobotWise that wants to use my app. Fixed some more bugs and todos and cleaned the code again. Python code is now pep8 correct. 
+
+# day 19
+Fixed some bugs and todos (day 15). Created server without robot, to test without a robot. 
