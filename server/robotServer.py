@@ -237,7 +237,7 @@ class Robot():
         self.camProxy.unsubscribe(nameId)
 
         if not naoImage:
-            self.thread.outMessages.put('{"type": "error", "kind": "picture",
+            self.thread.outMessages.put('{"type": "error", "kind": "picture", \
                                           "text": "Could not take picture"}')
             return
 
@@ -278,7 +278,7 @@ class Robot():
                                                               keys)
                 self.postureProxy.goToPosture("StandInit", 0.5)
             except:
-                msg = '{"type": "error", "kind": "move",
+                msg = '{"type": "error", "kind": "move", \
                         "text": "Could not perform move, try again"}'
                 self.thread.outMessages.put(msg)
 
