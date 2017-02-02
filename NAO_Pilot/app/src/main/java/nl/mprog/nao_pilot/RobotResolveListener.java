@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Caitlin Lagrand (10759972)
  * UvA Programmeerproject
  *
- * RobotResolve finds the robots IP given the discovered service.
+ * RobotResolveListener finds the robots IP given the discovered service.
  */
 
 
