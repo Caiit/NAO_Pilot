@@ -77,6 +77,7 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
             JSONObject json = new JSONObject();
             try {
                 json.put("type", "moves");
+                json.put("name", fileName);
                 if (fileName.equals("sit") || fileName.equals("stand")) {
                     json.put("file", fileName);
                 } else {
