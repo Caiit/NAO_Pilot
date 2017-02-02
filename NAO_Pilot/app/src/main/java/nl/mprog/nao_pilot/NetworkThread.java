@@ -130,7 +130,7 @@ class NetworkThread implements Runnable {
             msg.obj = "{\"type\": \"disconnect\", \"text\": \"Could not connect\"}";
             handler.sendMessage(msg);
             e.printStackTrace();
-            shutdown = true;
+            closeThread();
         }
     }
 
@@ -139,32 +139,47 @@ class NetworkThread implements Runnable {
      */
     private void receiveMessages() {
         try {
-            if (in.available() > 0) {
+            String message = "";
+            byte[] byteSize = new byte[8];
+            if (in.available() > 0 && in.read(byteSize) == -1) {
+                // Server is closed
+                message = toJson("disconnect", "Disconnected: server closed").toString();
+                closeThread();
+            } else {
                 // Get size of messsage
-                byte[] byteSize = new byte[8];
-                in.read(byteSize);
                 int size;
                 try {
                     size = Integer.parseInt(new String(byteSize));
                 } catch (NumberFormatException nfe) {
-                    System.out.println("Message doesn't start with a number");
                     return;
                 }
+
+                long startTime = System.currentTimeMillis();
+                long elapsedTime = 0L;
                 // Read message
-                String message = "";
-                while (in.available() < size ) {}
-                while (message.length() < size - 1) {
-                    int bufferSize = size - message.length();
-                    byte[] byteMessage = new byte[bufferSize];
-                    int bytesRead = in.read(byteMessage);
-                    byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
-                    message += fromBytes(validBytes);
+                while (in.available() < size && elapsedTime < 1000) {
+                    elapsedTime = System.currentTimeMillis() - startTime;
                 }
-                // Add message to the messages handler of the main thread
-                Message msg = Message.obtain();
-                msg.obj = message;
-                handler.sendMessage(msg);
+                if (in.available() < size) {
+                    // No complete message received, empty inputstream and send error
+                    byte[] restBytes = new byte[in.available()];
+                    in.read(restBytes);
+                    message = toJson("error", "Could not read message, try again").toString();
+                } else {
+                    // Read complete message
+                    while (message.length() < size - 1) {
+                        int bufferSize = size - message.length();
+                        byte[] byteMessage = new byte[bufferSize];
+                        int bytesRead = in.read(byteMessage);
+                        byte[] validBytes = Arrays.copyOfRange(byteMessage, 0, bytesRead);
+                        message += fromBytes(validBytes);
+                    }
+                }
             }
+            // Add message to the messages handler of the main thread
+            Message msg = Message.obtain();
+            msg.obj = message;
+            handler.sendMessage(msg);
         } catch (IOException e) {
             System.out.println("Receiving message failed.");
             e.printStackTrace();

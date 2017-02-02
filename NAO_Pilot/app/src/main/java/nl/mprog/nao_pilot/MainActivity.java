@@ -166,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                         case "info":
                             name = message.getString("name");
                             battery = Integer.parseInt(message.getString("battery"));
-                            Log.d(message.getString("stiffness"), "handleMessage: ");
                             stiffness = Boolean.parseBoolean(message.getString("stiffness"));
                             showInfo();
                             break;
@@ -176,8 +175,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                             // Change connect button and hide robot info
                             Button connectButton = (Button) findViewById(R.id.connectButton);
                             LinearLayout robotInfo = (LinearLayout) findViewById(R.id.robotInfo);
-                            connectButton.setText("Connect");
-                            robotInfo.setVisibility(View.INVISIBLE);
+                            if (connectButton != null) {
+                                connectButton.setText("Connect");
+                                robotInfo.setVisibility(View.INVISIBLE);
+                            }
                             break;
                         case "error":
                             Toast.makeText(getApplicationContext(), message.getString("text"),
