@@ -20,7 +20,7 @@ robot and the app.
 """
 
 
-class networkThread (threading.Thread):
+class NetworkThread (threading.Thread):
     """
     Constructor, set all variables.
     """
@@ -148,7 +148,7 @@ class Robot():
         self.batteryProxy = ALProxy("ALBattery", self.IP, 9559)
         self.systemProxy = ALProxy("ALSystem", self.IP, 9559)
 
-        self.thread = networkThread()
+        self.thread = NetworkThread()
         self.thread.daemon = True
         self.thread.start()
         while (True):

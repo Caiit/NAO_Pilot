@@ -19,7 +19,7 @@ robot and the app.
 """
 
 
-class networkThread (threading.Thread):
+class NetworkThread (threading.Thread):
     """
     Constructor, set all variables.
     """
@@ -61,7 +61,6 @@ class networkThread (threading.Thread):
         self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print 'Socket created'
 
-
         # Bind socket to local host and port
         try:
             self.serverSocket.bind(("", self.PORT))
@@ -78,7 +77,9 @@ class networkThread (threading.Thread):
         # Register service
         IP = socket.inet_aton(ifaddresses(self.INTERFACE)[2][0]['addr'])
 
-        info = ServiceInfo("_naoqi._tcp.local.", "Fake robot._naoqi._tcp.local.", IP, self.PORT, 0, 0, {})
+        serviceType = "_naoqi._tcp.local."
+        name = "Fake robot._naoqi._tcp.local."
+        info = ServiceInfo(serviceType, name, IP, self.PORT, 0, 0, {})
         zeroconf = Zeroconf()
         print "Registration of service"
         zeroconf.register_service(info)
@@ -158,7 +159,7 @@ class FakeRobot():
         # self.batteryProxy = ALProxy("ALBattery", self.IP, 9559)
         # self.systemProxy = ALProxy("ALSystem", self.IP, 9559)
 
-        self.thread = networkThread(interface)
+        self.thread = NetworkThread(interface)
         self.thread.daemon = True
         self.thread.start()
         while (True):
@@ -241,11 +242,6 @@ class FakeRobot():
     """
     def takePicture(self):
         print "Cheeeeeeeese"
-        with open("robot.png", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-        self.thread.outMessages.put('{"type": "picture", "img": "' +
-                                    encoded_string + '"}')
 
     """
     Let the robot execute the given move file.
@@ -261,7 +257,7 @@ class FakeRobot():
             return
 
         data = self.toJson(self.thread.inMessages.get())
-        
+
         dataType = data["type"]
         if dataType == "connect":
             print "Connected sound"
