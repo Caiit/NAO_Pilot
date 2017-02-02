@@ -1,6 +1,6 @@
 # NAO Pilot
 Caitlin Lagrand </br>
-UvA Programmeerproject application January 2017.
+UvA Programmeerproject, January 2017.
 
 
 The NAO pilot application controls a Nao robot (https://www.ald.softbankrobotics.com/en/cool-robots/nao). This application can be used for easily giving demonstrations with the Nao robot. The application connects with a Nao via WiFi, lets the Nao speak, walk, take a picture and perform specific moves like dances, kicks etc. Sockets are used to connect and control the Nao via the application. The Nao acts as a server with a Python script that needs to be run on the robot. The application acts as the client and send messages to the robot.
@@ -10,25 +10,23 @@ The NAO pilot application controls a Nao robot (https://www.ald.softbankrobotics
 
 Connect screen: select your robot from the drop-down list and connect by clicking on the connect button. When connected show robot information like name, battery and stiffness status.
 
-<!-- TODO: add connected screenshot -->
-
-<img src="/doc/Connect.png" style="width: 200px;">
+<img src="/doc/Connect.png" style="width: 50px;">
 
 Speak screen: enter what to say and set the speak settings like volume, speed and pitch.
 
-<img src="/doc/Speak.png" style="width: 200px;">
+<img src="/doc/Speak.png" style="width: 50px;">
 
 Walk screen: press an arrow to move in that direction and release to stop moving. Set the speed using the slider.
 
-<img src="/doc/Walk.png" style="width: 200px;">
+<img src="/doc/Walk.png" style="width: 50px;">
 
 Camera screen: take a picture with the robot and show it. Save the image on the phone.
 
-<img src="/doc/Camera.png" style="width: 200px;">
+<img src="/doc/Camera.png" style="width: 50px;">
 
 Moves screen: click on a move button to perform that move.
 
-<img src="/doc/Moves.png" style="width: 200px;">
+<img src="/doc/Moves.png" style="width: 50px;">
 
 ## Datasources and external components
 

@@ -1,6 +1,6 @@
 # Design Document NAO Pilot
 Caitlin Lagrand </br>
-UvA Programmeerproject application January 2017.
+UvA Programmeerproject, January 2017.
 
 ## Diagram of classes and features
 Connect Activity: ask for IP and connect button, when connected show robot information like name and battery status and volume.</br>
