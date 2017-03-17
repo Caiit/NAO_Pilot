@@ -264,7 +264,7 @@ class Robot():
     Let the robot execute the given move file.
     """
     def moves(self, data):
-        code = data["file"]
+        code = data["name"]
         if code == "stand":
             self.postureProxy.goToPosture("StandInit", 0.5)
         elif code == "sit":
@@ -272,6 +272,8 @@ class Robot():
         else:
             try:
                 self.postureProxy.goToPosture("StandInit", 0.5)
+                with open(data["name"], 'r') as myfile:
+                    code = myfile.read()
                 exec(code)
                 if names:
                     self.motionProxy.angleInterpolationBezier(names, times,

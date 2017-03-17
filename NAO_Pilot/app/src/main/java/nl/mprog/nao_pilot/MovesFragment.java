@@ -86,21 +86,21 @@ public class MovesFragment extends Fragment implements View.OnClickListener {
             try {
                 json.put("type", "moves");
                 json.put("name", fileName);
-                if (fileName.equals("sit") || fileName.equals("stand")) {
-                    json.put("file", fileName);
-                } else {
-                    // Get file
-                    InputStream is = getContext().getAssets().open(fileName);
-                    int size = is.available();
-                    byte[] byteFile = new byte[size];
-                    is.read(byteFile);
-                    is.close();
-                    // Convert the file into a string.
-                    String file = new String(byteFile);
-                    json.put("file", file);
-                }
+//                if (fileName.equals("sit") || fileName.equals("stand")) {
+//                    json.put("file", fileName);
+//                } else {
+//                    // Get file
+//                    InputStream is = getContext().getAssets().open(fileName);
+//                    int size = is.available();
+//                    byte[] byteFile = new byte[size];
+//                    is.read(byteFile);
+//                    is.close();
+//                    // Convert the file into a string.
+//                    String file = new String(byteFile);
+//                    json.put("file", file);
+//                }
                 networkThread.addToSend(json);
-            } catch (IOException | JSONException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
