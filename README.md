@@ -1,5 +1,4 @@
 # NAO Pilot
-Caitlin Lagrand </br>
 UvA Programmeerproject, January 2017.
 
 
